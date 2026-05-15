@@ -1,26 +1,111 @@
 @import "tailwindcss";
 
+/* ─── Font imports (self-hosted via next/font — faster than @import) ──────── */
+/* We declare these in layout.tsx using next/font/google */
+
+/* ─── Design Tokens ────────────────────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand palette — thermal map inspired */
+  --clr-bg:           #0a0b0f;      /* near-black base */
+  --clr-bg-card:      #111318;      /* card surfaces */
+  --clr-bg-elevated:  #1a1d24;      /* modals, dropdowns */
+  --clr-border:       #2a2d38;      /* subtle borders */
+  --clr-border-glow:  #3d4158;      /* hover borders */
+
+  /* Text */
+  --clr-text-primary:   #f0f2f8;
+  --clr-text-secondary: #8b90a4;
+  --clr-text-muted:     #4e5266;
+
+  /* Accent — electric cyan (for low bottleneck = good) */
+  --clr-accent:       #00d4ff;
+  --clr-accent-dim:   rgba(0, 212, 255, 0.15);
+  --clr-accent-glow:  rgba(0, 212, 255, 0.08);
+
+  /* Status colors — thermal scale */
+  --clr-ok:      #00d4ff;    /* 0–20% bottleneck */
+  --clr-low:     #22d3a0;    /* 21–40% */
+  --clr-medium:  #f5a524;    /* 41–60% */
+  --clr-high:    #ef4444;    /* 61–80% */
+  --clr-critical:#ff2056;    /* 81–100% */
+
+  /* Spacing rhythm */
+  --space-xs:  0.25rem;
+  --space-sm:  0.5rem;
+  --space-md:  1rem;
+  --space-lg:  1.5rem;
+  --space-xl:  2rem;
+  --space-2xl: 3rem;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* Transitions */
+  --transition-fast:   150ms ease;
+  --transition-medium: 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow:   500ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ─── Reset & Base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--clr-bg);
+  color: var(--clr-text-primary);
+  min-height: 100vh;
+}
+
+/* ─── Selection ─────────────────────────────────────────────────────────────── */
+::selection {
+  background: var(--clr-accent-dim);
+  color: var(--clr-accent);
+}
+
+/* ─── Scrollbar (webkit) ────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--clr-bg); }
+::-webkit-scrollbar-thumb { background: var(--clr-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--clr-border-glow); }
+
+/* ─── Focus ring ─────────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--clr-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Utility classes ──────────────────────────────────────────────────────── */
+.card {
+  background: var(--clr-bg-card);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+}
+
+.card-elevated {
+  background: var(--clr-bg-elevated);
+  border: 1px solid var(--clr-border-glow);
+  border-radius: var(--radius-lg);
+}
+
+.glow-text {
+  color: var(--clr-accent);
+  text-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+}
+
+/* Grid circuit trace background effect */
+.circuit-bg {
+  background-image:
+    linear-gradient(var(--clr-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--clr-border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: -1px -1px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
 }
