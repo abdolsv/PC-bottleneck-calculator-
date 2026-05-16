@@ -3,55 +3,200 @@ import Footer from '@/components/layout/Footer'
 
 export const metadata = {
   title: 'Terms of Service | PC Bottleneck Calculator',
-  description: 'Terms of service and usage conditions for the PC Bottleneck Calculator.',
+  description: 'Terms of service and usage conditions for the PC Bottleneck Calculator. Read before using our free hardware analysis tools.',
 }
+
+const lastUpdated = 'May 16, 2026'
 
 export default function TermsPage() {
   return (
     <>
       <Header />
       <main className="max-w-4xl mx-auto px-4 py-16">
-        <h1 className="text-3xl font-bold mb-8">Terms of Service</h1>
-        
-        <div className="space-y-6 text-[--clr-text-secondary] leading-relaxed">
-          <section>
-            <h2 className="text-xl font-semibold text-[--clr-text-primary] mb-3">1. Acceptance of Terms</h2>
+        {/* Header */}
+        <div className="mb-12">
+          <h1 className="text-3xl md:text-4xl font-bold mb-3">Terms of Service</h1>
+          <p className="text-[--clr-text-secondary]">Last updated: <span className="font-mono text-xs">{lastUpdated}</span></p>
+          <div className="mt-4 p-4 rounded-[--radius-sm] bg-[--clr-bg-card] border border-[--clr-border] text-sm text-[--clr-text-secondary] leading-relaxed">
+            Please read these terms carefully before using PC Bottleneck Calculator. By accessing our website or using our calculator tool, you agree to be bound by these terms.
+          </div>
+        </div>
+
+        <div className="space-y-8 text-[--clr-text-secondary] leading-relaxed">
+
+          <section className="card p-6 md:p-8">
+            <h2 className="text-xl font-bold text-[--clr-text-primary] mb-3">1. Acceptance of Terms</h2>
+            <p className="mb-3">
+              By accessing and using the PC Bottleneck Calculator website ("Service"), you accept and agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree with any part of these terms, you may not use our Service.
+            </p>
             <p>
-              By accessing and using the PC Bottleneck Calculator website, you accept and agree to be bound by the terms and provision of this agreement.
-              In addition, when using these particular services, you shall be subject to any posted guidelines or rules applicable to such services.
+              These terms apply to all visitors, users, and others who access or use the Service, regardless of whether they have created an account or are using the Service as a guest.
             </p>
           </section>
 
-          <section>
-            <h2 className="text-xl font-semibold text-[--clr-text-primary] mb-3">2. Description of Service</h2>
-            <p>
-              We provide users with an automated bottleneck calculation tool based on hardware benchmarks. 
-              The service is provided "AS IS" and we assume no responsibility for the timeliness, deletion, mis-delivery or failure to store any user communications or personalization settings.
+          <section className="card p-6 md:p-8">
+            <h2 className="text-xl font-bold text-[--clr-text-primary] mb-3">2. Description of Service</h2>
+            <p className="mb-3">
+              PC Bottleneck Calculator provides a free, browser-based tool that estimates hardware bottleneck percentages based on benchmark data. Our Service includes:
+            </p>
+            <ul className="list-none space-y-2 mb-3">
+              {[
+                'CPU and GPU bottleneck percentage estimation across multiple resolutions and use cases',
+                'Hardware compatibility rankings and comparison tables',
+                'Game-specific FPS estimates based on benchmark-normalized scoring',
+                'Programmatically generated CPU/GPU detail and comparison pages',
+                'A public REST API endpoint for querying bottleneck data',
+              ].map((item, i) => (
+                <li key={i} className="flex gap-2 items-start text-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[--clr-accent] mt-1.5 flex-shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <p className="text-sm">
+              The Service is provided on an <strong className="text-[--clr-text-primary]">"as is"</strong> and <strong className="text-[--clr-text-primary]">"as available"</strong> basis without any warranties of any kind.
             </p>
           </section>
 
-          <section>
-            <h2 className="text-xl font-semibold text-[--clr-text-primary] mb-3">3. Accuracy of Information</h2>
-            <p>
-              While we strive for accuracy, the hardware benchmarks and bottleneck percentages provided by this site are estimates. 
-              Real-world performance varies depending on numerous factors including thermal conditions, software optimization, background processes, and specific game engines.
-              We are not responsible for hardware purchases made solely based on the calculations provided by this tool.
+          <section className="card p-6 md:p-8">
+            <h2 className="text-xl font-bold text-[--clr-text-primary] mb-3">3. Accuracy of Information</h2>
+            <p className="mb-3">
+              While we strive for accuracy, the hardware benchmarks and bottleneck percentages generated by this tool are <strong className="text-[--clr-text-primary]">estimates only</strong>. Real-world performance varies significantly based on:
+            </p>
+            <div className="grid sm:grid-cols-2 gap-3 mb-3">
+              {[
+                'Operating system and driver versions',
+                'Background processes and software overhead',
+                'Specific in-game settings and graphics options',
+                'Ambient temperature and thermal paste quality',
+                'Power supply stability and cable quality',
+                'Storage speed (NVMe vs SATA SSD vs HDD)',
+                'Memory timings beyond just capacity and speed',
+                'Motherboard VRM quality for sustained workloads',
+              ].map((item, i) => (
+                <div key={i} className="flex gap-2 items-start text-xs p-2 rounded bg-[--clr-bg-elevated]">
+                  <span className="w-1 h-1 rounded-full bg-[--clr-medium] mt-1.5 flex-shrink-0" />
+                  {item}
+                </div>
+              ))}
+            </div>
+            <p className="text-sm p-3 rounded border border-[--clr-border] bg-[--clr-bg-elevated]">
+              ⚠️ <strong className="text-[--clr-text-primary]">We are not responsible for hardware purchasing decisions</strong> made solely on the basis of the estimates provided by this tool. Always cross-reference with professional reviews and benchmarks before buying.
             </p>
           </section>
 
-          <section>
-            <h2 className="text-xl font-semibold text-[--clr-text-primary] mb-3">4. Intellectual Property</h2>
-            <p>
-              All content on this website, including but not limited to text, graphics, logos, icons, images, and software, is the property of PC Bottleneck Calculator or its content suppliers and protected by international copyright laws.
+          <section className="card p-6 md:p-8">
+            <h2 className="text-xl font-bold text-[--clr-text-primary] mb-3">4. Affiliate Disclosure</h2>
+            <p className="mb-3">
+              PC Bottleneck Calculator participates in the Amazon Associates program and other affiliate advertising programs. This means that when you click certain "Check Price on Amazon" or similar links on our site and make a purchase, we may earn a small commission at <strong className="text-[--clr-text-primary]">no additional cost to you</strong>.
+            </p>
+            <p className="mb-3">
+              Affiliate links are used only to recommend products that we believe are relevant to your hardware search. Our bottleneck calculation results, rankings, and recommendations are <strong className="text-[--clr-text-primary]">not influenced by affiliate relationships</strong>. We do not receive compensation from hardware manufacturers for favorable rankings.
+            </p>
+            <p className="text-sm text-[--clr-text-muted]">
+              All affiliate links are marked with standard external link indicators. You are under no obligation to use our affiliate links.
             </p>
           </section>
 
-          <section>
-            <h2 className="text-xl font-semibold text-[--clr-text-primary] mb-3">5. Disclaimer of Warranties</h2>
-            <p>
-              Your use of the service is at your sole risk. The service is provided on an "as is" and "as available" basis. 
-              We expressly disclaim all warranties of any kind, whether express or implied, including, but not limited to the implied warranties of merchantability, fitness for a particular purpose and non-infringement.
+          <section className="card p-6 md:p-8">
+            <h2 className="text-xl font-bold text-[--clr-text-primary] mb-3">5. API Usage</h2>
+            <p className="mb-3">
+              We provide a public REST API at <code className="font-mono text-xs bg-[--clr-bg-elevated] px-1.5 py-0.5 rounded">/api/bottleneck</code> for querying hardware pairing data. By using this API, you agree to the following usage limits:
             </p>
+            <ul className="space-y-2 text-sm mb-3">
+              {[
+                'Maximum 30 requests per minute per IP address',
+                'Do not use the API to build a competing bottleneck calculator product without attribution',
+                'Do not scrape or mass-download all hardware data in a way that burdens our infrastructure',
+                'Commercial use in third-party applications requires written permission',
+              ].map((item, i) => (
+                <li key={i} className="flex gap-2 items-start">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[--clr-accent] mt-1.5 flex-shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <p className="text-sm">
+              We reserve the right to throttle or block API access from clients that violate these terms.
+            </p>
+          </section>
+
+          <section className="card p-6 md:p-8">
+            <h2 className="text-xl font-bold text-[--clr-text-primary] mb-3">6. Intellectual Property</h2>
+            <p className="mb-3">
+              All content on this website — including text, UI design, logos, graphics, software, and the bottleneck calculation algorithm — is the intellectual property of PC Bottleneck Calculator and is protected under applicable copyright law.
+            </p>
+            <p>
+              The underlying benchmark data is sourced from publicly available datasets. Where third-party data is used, we comply with the respective terms of those sources. You may not reproduce, distribute, or sell our content or calculation results without explicit written permission.
+            </p>
+          </section>
+
+          <section className="card p-6 md:p-8">
+            <h2 className="text-xl font-bold text-[--clr-text-primary] mb-3">7. Prohibited Uses</h2>
+            <p className="mb-3">You agree not to use the Service to:</p>
+            <ul className="space-y-2 text-sm">
+              {[
+                'Transmit any malicious code, viruses, or harmful data',
+                'Attempt to gain unauthorized access to our servers or infrastructure',
+                'Use automated bots to scrape hardware data at scale',
+                'Misrepresent our tool\'s results in published material',
+                'Use the Service in any way that violates applicable law or regulation',
+              ].map((item, i) => (
+                <li key={i} className="flex gap-2 items-start">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[--clr-high] mt-1.5 flex-shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="card p-6 md:p-8">
+            <h2 className="text-xl font-bold text-[--clr-text-primary] mb-3">8. Disclaimer of Warranties</h2>
+            <p className="mb-3">
+              The Service is provided without warranties of any kind. We do not warrant that:
+            </p>
+            <ul className="space-y-2 text-sm mb-3">
+              {[
+                'The Service will be uninterrupted, timely, or error-free',
+                'The results provided will be accurate for your specific hardware configuration',
+                'Any specific hardware pairing recommendation will result in the expected performance',
+                'The benchmark data reflects the absolute latest hardware releases',
+              ].map((item, i) => (
+                <li key={i} className="flex gap-2 items-start">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[--clr-text-muted] mt-1.5 flex-shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="card p-6 md:p-8">
+            <h2 className="text-xl font-bold text-[--clr-text-primary] mb-3">9. Limitation of Liability</h2>
+            <p>
+              To the maximum extent permitted by applicable law, PC Bottleneck Calculator shall not be liable for any indirect, incidental, special, consequential, or punitive damages — including but not limited to lost profits, hardware malfunctions from configuration changes, or data loss — arising from your use of or inability to use the Service.
+            </p>
+          </section>
+
+          <section className="card p-6 md:p-8">
+            <h2 className="text-xl font-bold text-[--clr-text-primary] mb-3">10. Changes to Terms</h2>
+            <p className="mb-3">
+              We reserve the right to modify these terms at any time. When we make significant changes, we will update the "Last updated" date at the top of this page. Your continued use of the Service after any modification constitutes your acceptance of the new terms.
+            </p>
+            <p className="text-sm text-[--clr-text-muted]">
+              We recommend reviewing these terms periodically for any updates.
+            </p>
+          </section>
+
+          <section className="card p-6 md:p-8">
+            <h2 className="text-xl font-bold text-[--clr-text-primary] mb-3">11. Governing Law</h2>
+            <p>
+              These terms shall be governed by and construed in accordance with applicable laws. Any disputes arising from these terms or your use of the Service shall be resolved through good-faith negotiation wherever possible.
+            </p>
+          </section>
+
+          <section className="card p-5 text-center bg-[--clr-bg-elevated]">
+            <p className="text-sm text-[--clr-text-secondary] mb-1">Questions about these terms?</p>
+            <p className="text-xs text-[--clr-text-muted]">Reach out via the contact details in our footer. We aim to respond within 48 hours.</p>
           </section>
         </div>
       </main>
