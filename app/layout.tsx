@@ -3,6 +3,7 @@ import { Space_Grotesk, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { GoogleAnalytics } from '@next/third-parties/google'
+import { ToastProvider } from '@/components/ui/Toast'
 import './globals.css'
 
 // Display/body font — sharp, technical, memorable
@@ -70,7 +71,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
       <body className="font-[var(--font-display)]">
+      <ToastProvider>
         {children}
+        </ToastProvider>
         <Analytics />
         <SpeedInsights />
         <GoogleAnalytics gaId="G-XXXXXXXXXX" />
