@@ -10,6 +10,7 @@ export interface SavedBuild {
     percentage: number
     label: string
     severity: string
+    efficiencyScore: number   // ← was missing, caused save/load mismatch
   }
   savedAt: string
 }
@@ -21,7 +22,7 @@ export function saveBuild(build: Omit<SavedBuild, 'id' | 'savedAt'>): SavedBuild
     savedAt: new Date().toISOString(),
   }
   const existing = getSavedBuilds()
-  const updated = [saved, ...existing].slice(0, 10) // max 10 saved builds
+  const updated = [saved, ...existing].slice(0, 10)
   localStorage.setItem('pc-builds', JSON.stringify(updated))
   return saved
 }
@@ -38,4 +39,8 @@ export function getSavedBuilds(): SavedBuild[] {
 export function deleteBuild(id: string): void {
   const updated = getSavedBuilds().filter(b => b.id !== id)
   localStorage.setItem('pc-builds', JSON.stringify(updated))
+}
+
+export function clearAllBuilds(): void {
+  localStorage.removeItem('pc-builds')
 }
