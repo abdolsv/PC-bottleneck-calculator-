@@ -7,6 +7,7 @@ import { calculateBottleneck } from '@/lib/bottleneck-engine'
 import { JsonLd } from '@/components/seo/JsonLd'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import { AmazonButton } from '@/components/ui/AmazonButton'
 import { SITE_URL } from '@/lib/constants'
 
 // ✅ Next.js 15: generateStaticParams stays the same
@@ -132,6 +133,17 @@ export default async function GpuPage({
           ))}
         </div>
 
+        {/* Amazon CTA for the GPU itself */}
+        <div className="card p-5 mb-10 flex flex-col sm:flex-row items-center gap-4 border border-[#f90]/20 bg-[#f90]/5">
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm mb-1">Buy the {gpu.name}</p>
+            <p className="text-xs text-[--clr-text-secondary]">
+              Check current prices, deals, and in-stock availability on Amazon.
+            </p>
+          </div>
+          <AmazonButton query={gpu.name} className="flex-shrink-0 text-sm" />
+        </div>
+
         {/* Best CPU Matches */}
         <div className="mb-10">
           <h2 className="text-xl font-semibold mb-1">
@@ -208,6 +220,7 @@ export default async function GpuPage({
                       </th>
                     ))}
                     <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-widest text-[--clr-text-muted]">Verdict</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-widest text-[--clr-text-muted] hidden lg:table-cell">Buy</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -247,6 +260,13 @@ export default async function GpuPage({
                           >
                             {mainResult.label}
                           </span>
+                        </td>
+                        <td className="px-4 py-3 text-center hidden lg:table-cell">
+                          <AmazonButton
+                            query={cpu.name}
+                            label="Buy"
+                            className="text-[10px] px-2 py-1 whitespace-nowrap"
+                          />
                         </td>
                       </tr>
                     )

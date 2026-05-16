@@ -4,6 +4,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 const MAILCHIMP_API_KEY  = process.env.MAILCHIMP_API_KEY ?? ''
 const MAILCHIMP_SERVER   = process.env.MAILCHIMP_SERVER ?? 'us1'  // e.g., us1, us6
 const MAILCHIMP_LIST_ID  = process.env.MAILCHIMP_LIST_ID ?? ''

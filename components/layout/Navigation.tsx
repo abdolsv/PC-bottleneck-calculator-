@@ -6,9 +6,9 @@ import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 
 const links = [
-  { href: '/',      label: 'Calculator' },
-  { href: '/faq',   label: 'FAQ' },
-  { href: '/blog',  label: 'Blog' },
+  { href: '/', label: 'Calculator' },
+  { href: '/faq', label: 'FAQ' },
+  { href: '/games', label: 'Games' },
   { href: '/about', label: 'About' },
 ]
 

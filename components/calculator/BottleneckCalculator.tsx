@@ -293,7 +293,7 @@ export default function BottleneckCalculator() {
                   {(Object.keys(RAM_SPEED_LABELS) as (keyof typeof RAM_SPEED_LABELS)[]).map(speed => (
                     <button
                       key={speed}
-                      onClick={() => setAdvanced(v => ({ ...v, ramSpeed: speed }))}
+                      onClick={() => setAdvanced(v => ({ ...v, ramSpeed: speed as AdvancedOptions['ramSpeed'] }))}
                       className="py-2 text-[10px] font-medium rounded-[--radius-sm] border transition-all"
                       style={{
                         background: advanced.ramSpeed === speed ? 'rgba(0,212,255,0.08)' : 'var(--clr-bg)',

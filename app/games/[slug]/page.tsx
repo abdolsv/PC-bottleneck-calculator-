@@ -235,7 +235,7 @@ export default async function GamePage({
                         </td>
                       ))}
                       <td className="px-4 py-3 text-center">
-                        <Link href={`/fps/${game.id}/${refCpu.id}/${gpu.id}`}>
+                        <Link href={`/build/${refCpu.id}/${gpu.id}`}>
                           <span
                             className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium"
                             style={{
@@ -268,20 +268,33 @@ export default async function GamePage({
               <Link
                 key={cpu.id}
                 href={`/cpu/${cpu.id}`}
-                className="card p-4 flex items-center gap-4 hover:border-[--clr-border-glow] transition-all group"
+                className="card p-5 flex items-center gap-4 hover:border-[--clr-border-glow] transition-all group"
               >
-                <div className="w-7 h-7 rounded-full bg-[--clr-bg-elevated] border border-[--clr-border] flex items-center justify-center text-xs font-bold text-[--clr-text-muted] flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[--clr-bg-elevated] border border-[--clr-border] flex items-center justify-center text-xs font-bold text-[--clr-text-muted] flex-shrink-0">
                   {i + 1}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm group-hover:text-[--clr-accent] transition-colors truncate">{cpu.name}</p>
-                  <p className="text-xs text-[--clr-text-muted]">{cpu.cores} cores · {cpu.boostClock}GHz</p>
+                  <p className="font-semibold text-sm group-hover:text-[--clr-accent] transition-colors truncate">{cpu.name}</p>
+                  <p className="text-xs text-[--clr-text-muted] mt-0.5">{cpu.cores} cores · {cpu.boostClock}GHz</p>
                 </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="font-mono font-bold text-sm" style={{ color: fpsColor(est1440.fps) }}>
-                    ~{est1440.fps} FPS
-                  </p>
-                  <p className="text-[10px] text-[--clr-text-muted]">1440p</p>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <div className="w-16 hidden sm:block">
+                    <div className="w-full bg-[--clr-bg-elevated] rounded-full h-1.5">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{
+                          width: `${Math.min(100, (est1440.fps / 240) * 100)}%`,
+                          backgroundColor: fpsColor(est1440.fps),
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-mono font-bold text-sm" style={{ color: fpsColor(est1440.fps) }}>
+                      ~{est1440.fps} FPS
+                    </p>
+                    <p className="text-[10px] text-[--clr-text-muted]">1440p High</p>
+                  </div>
                 </div>
               </Link>
             ))}

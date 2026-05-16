@@ -8,6 +8,7 @@ import { calculateBottleneck } from '@/lib/bottleneck-engine'
 import { JsonLd } from '@/components/seo/JsonLd'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import { AmazonButton } from '@/components/ui/AmazonButton'
 import { SITE_URL } from '@/lib/constants'
 
 interface Props { params: { cpuId: string; gpuId: string } }
@@ -174,6 +175,9 @@ export default function BuildPage({ params }: Props) {
               <div className="flex justify-between"><span>Socket</span><span className="font-mono">{cpu.socket}</span></div>
               <div className="flex justify-between"><span>Benchmark Score</span><span className="font-mono text-[--clr-accent]">{cpu.benchmarkScore}/100</span></div>
             </div>
+            <div className="mt-4 pt-4 border-t border-[--clr-border]">
+              <AmazonButton query={cpu.name} className="w-full text-sm" />
+            </div>
           </div>
           <div className="card p-4">
             <p className="text-xs text-[--clr-text-muted] mb-1">GPU</p>
@@ -184,6 +188,9 @@ export default function BuildPage({ params }: Props) {
               <div className="flex justify-between"><span>Target Res.</span><span className="font-mono">{gpu.targetResolution}</span></div>
               <div className="flex justify-between"><span>Release Year</span><span className="font-mono">{gpu.releaseYear}</span></div>
               <div className="flex justify-between"><span>Benchmark Score</span><span className="font-mono text-[--clr-ok]">{gpu.benchmarkScore}/100</span></div>
+            </div>
+            <div className="mt-4 pt-4 border-t border-[--clr-border]">
+              <AmazonButton query={gpu.name} className="w-full text-sm" />
             </div>
           </div>
         </div>

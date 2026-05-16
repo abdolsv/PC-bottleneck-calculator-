@@ -2,6 +2,7 @@
 'use client'
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { Search, ChevronDown, X, Plus, Trash2 } from 'lucide-react'
+import Fuse from 'fuse.js'
 import type { CPU, GPU } from '@/lib/hardware-data'
 
 type Item = CPU | GPU
@@ -29,35 +30,34 @@ export function ComponentSelector<T extends Item>({
   const ref = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const allItems = [...customItems, ...items]
+  const allItems = useMemo(() => [...customItems, ...items], [customItems, items])
 
-  const filtered = useMemo(
-    () => allItems.filter(item =>
-      renderLabel(item).toLowerCase().includes(search.toLowerCase())
-    ),
-    [allItems, search, renderLabel]
-  )
+  const fuse = useMemo(() => new Fuse(allItems, {
+    keys: ['name', 'brand', 'model'],
+    threshold: 0.3,
+    ignoreLocation: true,
+  }), [allItems])
 
-  const customFiltered = useMemo(
-    () => customItems.filter(item =>
-      renderLabel(item).toLowerCase().includes(search.toLowerCase())
-    ),
-    [customItems, search, renderLabel]
-  )
+  const filtered = useMemo(() => {
+    if (!search) return items.slice(0, 200) // limit initial render to 200 items to avoid lag
+    return fuse.search(search).map(res => res.item).filter(item => items.includes(item as T)).slice(0, 100)
+  }, [fuse, search, items])
+
+  const customFiltered = useMemo(() => {
+    if (!search) return customItems
+    return fuse.search(search).map(res => res.item).filter(item => customItems.includes(item as T))
+  }, [fuse, search, customItems])
 
   // Group standard items by generation/brand
   const grouped = useMemo(() => {
-    const standardFiltered = items.filter(item =>
-      renderLabel(item).toLowerCase().includes(search.toLowerCase())
-    )
     const groups: Record<string, T[]> = {}
-    standardFiltered.forEach(item => {
+    filtered.forEach(item => {
       const key = ('generation' in item ? item.generation : item.brand) as string
       if (!groups[key]) groups[key] = []
-      groups[key].push(item)
+      groups[key].push(item as T)
     })
     return groups
-  }, [items, search, renderLabel])
+  }, [filtered])
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {

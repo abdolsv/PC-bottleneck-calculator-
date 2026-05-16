@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { CPUs, GPUs } from '@/lib/hardware-data'
 import { calculateBottleneck } from '@/lib/bottleneck-engine'
 
+export const dynamic = 'force-dynamic'
+
 // Rate limiting — use Upstash Redis in production
 const requestCounts = new Map<string, { count: number; resetAt: number }>()
 

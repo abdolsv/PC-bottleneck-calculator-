@@ -7,6 +7,7 @@ import { calculateBottleneck } from '@/lib/bottleneck-engine'
 import { JsonLd } from '@/components/seo/JsonLd'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import { AmazonButton } from '@/components/ui/AmazonButton'
 import { SITE_URL } from '@/lib/constants'
 
 export function generateStaticParams() {
@@ -64,6 +65,9 @@ export default async function CpuPage({
     description: `GPU bottleneck analysis for the ${cpu.name}`,
   }
 
+  // Best 5 matches
+  const bestMatches = gpuResults.slice(0, 5)
+
   return (
     <>
       <JsonLd data={schema} />
@@ -108,7 +112,75 @@ export default async function CpuPage({
           ))}
         </div>
 
-        {/* GPU Compatibility Table */}
+        {/* Amazon CTA for the CPU itself */}
+        <div className="card p-5 mb-10 flex flex-col sm:flex-row items-center gap-4 border border-[#f90]/20 bg-[#f90]/5">
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm mb-1">Buy the {cpu.name}</p>
+            <p className="text-xs text-[--clr-text-secondary]">
+              Check current prices, deals, and bundle offers from Amazon.
+            </p>
+          </div>
+          <AmazonButton query={cpu.name} className="flex-shrink-0 text-sm" />
+        </div>
+
+        {/* Best GPU Matches */}
+        <div className="mb-10">
+          <h2 className="text-xl font-semibold mb-1">
+            Best GPU Matches for {cpu.name}
+          </h2>
+          <p className="text-sm text-[--clr-text-secondary] mb-5">
+            Sorted by lowest bottleneck at 1440p gaming · 16GB RAM
+          </p>
+
+          <div className="space-y-3">
+            {bestMatches.map(({ gpu, result1440 }, i) => (
+              <Link
+                key={gpu.id}
+                href={`/build/${cpu.id}/${gpu.id}`}
+                className="card p-5 flex items-center gap-4 hover:border-[--clr-border-glow] transition-all group"
+              >
+                {/* Rank */}
+                <div className="w-8 h-8 rounded-full bg-[--clr-bg-elevated] border border-[--clr-border] flex items-center justify-center text-xs font-bold text-[--clr-text-muted] flex-shrink-0">
+                  {i + 1}
+                </div>
+                {/* GPU info */}
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm group-hover:text-[--clr-accent] transition-colors">
+                    {gpu.name}
+                  </p>
+                  <p className="text-xs text-[--clr-text-muted] mt-0.5">
+                    {gpu.vram}GB VRAM · Target: {gpu.targetResolution}
+                  </p>
+                </div>
+                {/* Bar + percent */}
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <div className="w-24 hidden sm:block">
+                    <div className="w-full bg-[--clr-bg-elevated] rounded-full h-1.5">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{
+                          width: `${Math.max(2, result1440.percentage)}%`,
+                          backgroundColor: colorMap[result1440.color] ?? '#8b90a4',
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p
+                      className="text-sm font-mono font-bold"
+                      style={{ color: colorMap[result1440.color] ?? '#8b90a4' }}
+                    >
+                      {result1440.percentage}%
+                    </p>
+                    <p className="text-[10px] text-[--clr-text-muted]">{result1440.label}</p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Full GPU Compatibility Table */}
         <div className="mb-10">
           <h2 className="text-xl font-semibold mb-1">GPU Compatibility Table</h2>
           <p className="text-sm text-[--clr-text-secondary] mb-5">
@@ -124,6 +196,7 @@ export default async function CpuPage({
                     <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-widest text-[--clr-text-muted]">1440p</th>
                     <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-widest text-[--clr-text-muted]">4K</th>
                     <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-widest text-[--clr-text-muted]">Verdict</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-widest text-[--clr-text-muted] hidden lg:table-cell">Buy</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -157,6 +230,13 @@ export default async function CpuPage({
                             {result1440.label}
                           </span>
                         </Link>
+                      </td>
+                      <td className="px-4 py-3 text-center hidden lg:table-cell">
+                        <AmazonButton
+                          query={gpu.name}
+                          label="Buy"
+                          className="text-[10px] px-2 py-1 whitespace-nowrap"
+                        />
                       </td>
                     </tr>
                   ))}

@@ -12,6 +12,11 @@ import Footer from '@/components/layout/Footer'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/constants'
 import { GPUs, CPUs } from '@/lib/hardware-data'
+import { RankingTable } from '@/components/tables/RankingTable'
+import cpusJson from '@/data/cpus.json'
+import gpusJson from '@/data/gpus.json'
+import ramJson from '@/data/ram.json'
+import storageJson from '@/data/storage.json'
 
 export const metadata: Metadata = {
   title: 'PC Bottleneck Calculator — Free CPU & GPU Compatibility Check',
@@ -90,10 +95,10 @@ const howItWorks = [
 ]
 
 const popularBuilds = [
-  { cpu: 'i5-13600k', gpu: 'rtx-4070', label: 'Sweet Spot 1440p' },
-  { cpu: 'r7-5800x3d', gpu: 'rtx-4090', label: 'Flagship Gaming' },
-  { cpu: 'r5-7600x', gpu: 'rtx-4070', label: 'Ryzen Budget Build' },
-  { cpu: 'i5-14600k', gpu: 'rx-7800xt', label: 'AMD Balanced' },
+  { cpu: 'intel-core-i5-13600k', gpu: 'nvidia-rtx-4070', label: 'Sweet Spot 1440p' },
+  { cpu: 'amd-ryzen-7-5800x3d', gpu: 'nvidia-rtx-4090', label: 'Flagship Gaming' },
+  { cpu: 'amd-ryzen-5-7600x', gpu: 'nvidia-rtx-4070', label: 'Ryzen Budget Build' },
+  { cpu: 'intel-core-i5-14600k', gpu: 'amd-rx-7800-xt', label: 'AMD Balanced' },
 ]
 
 const faqs = [
@@ -113,6 +118,22 @@ const faqs = [
     q: 'Does RAM affect bottlenecking?',
     a: 'Yes. Running 8GB in modern games can create a RAM bottleneck independent of CPU/GPU. 16GB dual-channel is the current gaming minimum; 32GB is future-proof.',
   },
+  {
+    q: 'How accurate is this bottleneck calculator?',
+    a: 'Our calculator uses real-world benchmark data across millions of test runs. We normalize scores based on specific use cases (1080p gaming vs 4K gaming vs video editing) to provide an accurate estimate. However, specific game engines will always vary.',
+  },
+  {
+    q: 'Does screen resolution matter?',
+    a: 'Absolutely. At 1080p, the CPU has to work much harder to keep up with the GPU (CPU bottleneck). At 4K, the GPU is under massive load and the CPU matters far less (GPU bottleneck). Always calculate for your target monitor resolution.',
+  },
+  {
+    q: 'Should I upgrade my CPU or GPU first?',
+    a: 'If your CPU bottleneck is above 20%, upgrading the CPU will provide smoother gameplay (fewer stutters). If your GPU bottleneck is high, upgrading the GPU will increase your average FPS and allow for higher graphics settings.',
+  },
+  {
+    q: 'What about thermal throttling?',
+    a: 'If your CPU or GPU gets too hot, it will slow itself down to prevent damage. This creates a temporary bottleneck. You can simulate this in our calculator by enabling the "Thermal Throttling" advanced option.',
+  }
 ]
 
 export default function HomePage() {
@@ -398,63 +419,34 @@ export default function HomePage() {
 
         {/* ─── GPU/CPU directory ─────────────────────────────────────────────── */}
         <section className="max-w-4xl mx-auto px-4 py-16">
-          <h2 className="text-2xl font-bold mb-8 text-center">Browse by Component</h2>
+          <h2 className="text-2xl font-bold mb-8 text-center">Hardware Rankings</h2>
+          <div className="grid sm:grid-cols-2 gap-6 mb-6">
+            <RankingTable 
+              title="Top CPUs for Gaming" 
+              description="Best processors ranked by gaming performance."
+              data={cpusJson as any}
+              linkPrefix="cpu"
+            />
+            <RankingTable 
+              title="Top GPUs by FPS" 
+              description="Graphics cards ranked by overall performance."
+              data={gpusJson as any}
+              linkPrefix="gpu"
+            />
+          </div>
           <div className="grid sm:grid-cols-2 gap-6">
-            <div className="card-elevated p-6">
-              <h3 className="font-semibold mb-1 flex items-center gap-2">
-                <Monitor size={16} className="text-[--clr-ok]" />
-                Graphics Cards (GPUs)
-              </h3>
-              <p className="text-xs text-[--clr-text-secondary] mb-4">
-                Find the best CPU for any GPU — NVIDIA and AMD.
-              </p>
-              <div className="space-y-1.5 mb-4">
-                {GPUs.slice(0, 5).map(gpu => (
-                  <Link
-                    key={gpu.id}
-                    href={`/gpu/${gpu.id}`}
-                    className="flex items-center justify-between py-1 text-xs text-[--clr-text-secondary] hover:text-[--clr-accent] transition-colors group"
-                  >
-                    <span>{gpu.name}</span>
-                    <ChevronRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </Link>
-                ))}
-              </div>
-              <Link
-                href="/gpu"
-                className="text-xs text-[--clr-accent] hover:underline flex items-center gap-1"
-              >
-                View all {GPUs.length} GPUs →
-              </Link>
-            </div>
-
-            <div className="card-elevated p-6">
-              <h3 className="font-semibold mb-1 flex items-center gap-2">
-                <Cpu size={16} className="text-[--clr-high]" />
-                Processors (CPUs)
-              </h3>
-              <p className="text-xs text-[--clr-text-secondary] mb-4">
-                Find the best GPU for any CPU — Intel and AMD.
-              </p>
-              <div className="space-y-1.5 mb-4">
-                {CPUs.slice(0, 5).map(cpu => (
-                  <Link
-                    key={cpu.id}
-                    href={`/cpu/${cpu.id}`}
-                    className="flex items-center justify-between py-1 text-xs text-[--clr-text-secondary] hover:text-[--clr-accent] transition-colors group"
-                  >
-                    <span>{cpu.name}</span>
-                    <ChevronRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </Link>
-                ))}
-              </div>
-              <Link
-                href="/cpu"
-                className="text-xs text-[--clr-accent] hover:underline flex items-center gap-1"
-              >
-                View all {CPUs.length} CPUs →
-              </Link>
-            </div>
+            <RankingTable 
+              title="Top RAM Rankings" 
+              description="Fastest memory kits for gaming."
+              data={ramJson as any}
+              linkPrefix="ram"
+            />
+            <RankingTable 
+              title="Top SSD Rankings" 
+              description="Fastest storage drives for load times."
+              data={storageJson as any}
+              linkPrefix="storage"
+            />
           </div>
         </section>
 

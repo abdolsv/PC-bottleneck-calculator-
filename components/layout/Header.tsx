@@ -1,16 +1,16 @@
-// components/layout/Header.tsx
 'use client'
+
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Cpu, Menu, X, ChevronRight } from 'lucide-react'
 
 const links = [
-  { href: '/',      label: 'Calculator',  desc: 'Check your build' },
-  { href: '/gpu',   label: 'GPUs',        desc: 'All graphics cards' },
-  { href: '/cpu',   label: 'CPUs',        desc: 'All processors' },
-  { href: '/blog',  label: 'Blog',        desc: 'Guides & analysis' },
-  { href: '/faq',   label: 'FAQ',         desc: 'Common questions' },
+  { href: '/', label: 'Calculator', desc: 'Check your build' },
+  { href: '/gpu', label: 'GPUs', desc: 'All graphics cards' },
+  { href: '/cpu', label: 'CPUs', desc: 'All processors' },
+  { href: '/games', label: 'Games', desc: 'Guides & analysis' },
+  { href: '/faq', label: 'FAQ', desc: 'Common questions' },
 ]
 
 export default function Header() {
@@ -18,17 +18,14 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
 
-  // Close mobile menu on route change
   useEffect(() => { setOpen(false) }, [pathname])
 
-  // Add shadow on scroll
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 10)
     window.addEventListener('scroll', handler, { passive: true })
     return () => window.removeEventListener('scroll', handler)
   }, [])
 
-  // Lock body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
@@ -37,13 +34,12 @@ export default function Header() {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 border-b border-[--clr-border] transition-shadow duration-300 ${
-          scrolled ? 'shadow-[0_4px_24px_rgba(0,0,0,0.4)]' : ''
-        }`}
+        className={`sticky top-0 z-50 border-b border-[--clr-border] transition-shadow duration-300 ${scrolled ? 'shadow-[0_4px_24px_rgba(0,0,0,0.4)]' : ''
+          }`}
         style={{ background: 'rgba(10, 11, 15, 0.95)', backdropFilter: 'blur(12px)' }}
       >
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          {/* Logo */}
+
           <Link href="/" className="flex items-center gap-2 group flex-shrink-0">
             <div
               className="w-7 h-7 rounded-[--radius-sm] flex items-center justify-center transition-all duration-300 group-hover:shadow-[0_0_16px_rgba(0,212,255,0.5)]"
@@ -55,11 +51,9 @@ export default function Header() {
               <span className="font-bold text-sm tracking-tight">
                 PC<span className="text-[--clr-accent]">Bottleneck</span>
               </span>
-              <span className="hidden sm:block text-[--clr-text-muted] text-xs">.com</span>
             </div>
           </Link>
 
-          {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-0.5">
             {links.map(({ href, label }) => {
               const active = pathname === href || (href !== '/' && pathname.startsWith(href))
@@ -67,11 +61,10 @@ export default function Header() {
                 <Link
                   key={href}
                   href={href}
-                  className={`px-3 py-1.5 rounded-[--radius-sm] text-sm transition-all duration-150 ${
-                    active
+                  className={`px-3 py-1.5 rounded-[--radius-sm] text-sm transition-all duration-150 ${active
                       ? 'bg-[rgba(0,212,255,0.1)] text-[--clr-accent] font-medium'
                       : 'text-[--clr-text-secondary] hover:text-[--clr-text-primary] hover:bg-[--clr-bg-elevated]'
-                  }`}
+                    }`}
                 >
                   {label}
                 </Link>
@@ -79,7 +72,6 @@ export default function Header() {
             })}
           </nav>
 
-          {/* Desktop CTA */}
           <Link
             href="/"
             className="hidden md:inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-[--radius-sm] transition-opacity hover:opacity-90"
@@ -89,7 +81,6 @@ export default function Header() {
             <ChevronRight size={14} />
           </Link>
 
-          {/* Mobile hamburger */}
           <button
             onClick={() => setOpen(v => !v)}
             className="md:hidden w-9 h-9 flex items-center justify-center rounded-[--radius-sm] transition-colors"
@@ -107,10 +98,8 @@ export default function Header() {
         </div>
       </header>
 
-      {/* Mobile menu overlay — FULL OPAQUE, not transparent */}
       {open && (
         <>
-          {/* Dark backdrop */}
           <div
             className="fixed inset-0 z-40 md:hidden"
             style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
@@ -118,11 +107,10 @@ export default function Header() {
             aria-hidden="true"
           />
 
-          {/* Menu panel — completely solid background */}
           <div
             className="fixed top-14 left-0 right-0 z-40 md:hidden border-b"
             style={{
-              background: '#111318',  /* solid — NOT transparent */
+              background: '#111318',
               borderColor: '#2a2d38',
             }}
           >
@@ -160,7 +148,6 @@ export default function Header() {
               })}
             </nav>
 
-            {/* Mobile CTA */}
             <div className="px-4 pb-4 pt-1">
               <Link
                 href="/"
