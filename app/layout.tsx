@@ -45,13 +45,15 @@ export const metadata: Metadata = {
     title: 'PC Bottleneck Calculator — Free CPU & GPU Compatibility Tool',
     description:
       'Find out if your CPU is bottlenecking your GPU instantly. Free, accurate, no signup required.',
-    images: [{ url: '/og/default.png', width: 1200, height: 630, alt: 'PC Bottleneck Calculator' }],
+    // 🎨 Routed directly to your dynamic edge generation engine
+    images: [{ url: '/og', width: 1200, height: 630, alt: 'PC Bottleneck Calculator' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'PC Bottleneck Calculator',
     description: 'Free CPU & GPU bottleneck analysis tool',
-    images: ['/og/default.png'],
+    // 🎨 Routed directly to your dynamic edge generation engine
+    images: ['/og'],
   },
   robots: {
     index: true,
@@ -64,7 +66,6 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  
   verification: {
     google: '1NWH8PUXZMUGf_QdZ72WhlBOM2Ly2AF61cJ9VQcvSfg',
   },
