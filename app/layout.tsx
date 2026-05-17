@@ -6,7 +6,6 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 import { ToastProvider } from '@/components/ui/Toast'
 import './globals.css'
 
-// Display/body font — sharp, technical, memorable
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-display',
@@ -21,7 +20,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://YOUR-VERCEL-URL.vercel.app'), // ← update after first deploy
+  metadataBase: new URL('https://pcbottleneck.vercel.app/'),
   title: {
     default: 'PC Bottleneck Calculator — Free CPU & GPU Compatibility Tool',
     template: '%s | PC Bottleneck Calculator',
@@ -41,7 +40,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://YOUR-VERCEL-URL.vercel.app',
+    url: 'https://pcbottleneck.vercel.app/',
     siteName: 'PC Bottleneck Calculator',
     title: 'PC Bottleneck Calculator — Free CPU & GPU Compatibility Tool',
     description:
@@ -65,18 +64,22 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  
+  verification: {
+    google: '1NWH8PUXZMUGf_QdZ72WhlBOM2Ly2AF61cJ9VQcvSfg',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
       <body className="font-[var(--font-display)]">
-      <ToastProvider>
-        {children}
+        <ToastProvider>
+          {children}
         </ToastProvider>
         <Analytics />
         <SpeedInsights />
-        <GoogleAnalytics gaId="G-XXXXXXXXXX" />
+        <GoogleAnalytics gaId="G-EMCMP725FK" />
       </body>
     </html>
   )
