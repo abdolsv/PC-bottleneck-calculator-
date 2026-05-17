@@ -19,5 +19,5 @@ Disallow: /*?*calc=
 Disallow: /*?*share=
 
 # Host and Sitemap
-Host: https://pc-bottleneck-calculator.com
-Sitemap: https://pc-bottleneck-calculator.com/sitemap.xml
+Host: https://pcbottleneck.vercel.app
+Sitemap: https://pcbottleneck.vercel.app/sitemap.xml
