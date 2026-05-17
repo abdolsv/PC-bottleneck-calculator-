@@ -48,14 +48,23 @@ export function ComponentSelector<T extends Item>({
     return fuse.search(search).map(res => res.item).filter(item => customItems.includes(item as T))
   }, [fuse, search, customItems])
 
-  // Group standard items by generation/brand
+  // Group standard items by generation/brand AND strip duplicates cleanly before rendering
   const grouped = useMemo(() => {
     const groups: Record<string, T[]> = {}
+    
     filtered.forEach(item => {
       const key = ('generation' in item ? item.generation : item.brand) as string
       if (!groups[key]) groups[key] = []
       groups[key].push(item as T)
     })
+
+    // Deduplicate array items within each group
+    Object.keys(groups).forEach(key => {
+      groups[key] = groups[key].filter(
+        (item, index, self) => self.findIndex(i => i.id === item.id) === index
+      )
+    })
+
     return groups
   }, [filtered])
 
@@ -219,14 +228,11 @@ export function ComponentSelector<T extends Item>({
                 >
                   {group}
                 </div>
-                const uniqueGroupItems = groupItems.filter(
-                  (item, index, self) => self.findIndex(i => i.id === item.id) === index
-                );
-                
-                {uniqueGroupItems.map(item => (
+
+                {groupItems.map(item => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between px-4 py-2.5"
+                    className="flex items-center justify-between px-4 py-2.5 cursor-pointer transition-colors"
                     style={{
                       backgroundColor: selected?.id === item.id ? 'rgba(0,212,255,0.12)' : 'transparent',
                     }}
@@ -278,4 +284,3 @@ export function ComponentSelector<T extends Item>({
     </div>
   )
 }
-

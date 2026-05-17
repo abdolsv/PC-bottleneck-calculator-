@@ -1,5 +1,5 @@
 // app/build/[cpuId]/[gpuId]/page.tsx
-// 196 auto-generated pages targeting "[CPU] [GPU] bottleneck" searches
+// On-demand generated pages targeting "[CPU] [GPU] bottleneck" searches
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -11,17 +11,17 @@ import Footer from '@/components/layout/Footer'
 import { AmazonButton } from '@/components/ui/AmazonButton'
 import { SITE_URL } from '@/lib/constants'
 
-interface Props { params: { cpuId: string; gpuId: string } }
+// Forces on-demand server rendering to prevent build worker stack overflow crashes
+export const dynamic = 'force-dynamic'
 
-export function generateStaticParams() {
-  const params: { cpuId: string; gpuId: string }[] = []
-  CPUs.forEach(cpu => GPUs.forEach(gpu => params.push({ cpuId: cpu.id, gpuId: gpu.id })))
-  return params
+interface Props { 
+  params: Promise<{ cpuId: string; gpuId: string }> 
 }
 
-export function generateMetadata({ params }: Props): Metadata {
-  const cpu = CPUs.find(c => c.id === params.cpuId)
-  const gpu = GPUs.find(g => g.id === params.gpuId)
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const resolvedParams = await params
+  const cpu = CPUs.find(c => c.id === resolvedParams.cpuId)
+  const gpu = GPUs.find(g => g.id === resolvedParams.gpuId)
   if (!cpu || !gpu) return {}
 
   const result = calculateBottleneck(cpu, gpu, 'gaming-1440p', 16)
@@ -50,16 +50,17 @@ const useCases = [
 ] as const
 
 const colorMap: Record<string, string> = {
-  '--clr-ok':      '#00d4ff',
-  '--clr-low':     '#22d3a0',
-  '--clr-medium':  '#f5a524',
-  '--clr-high':    '#ef4444',
+  '--clr-ok':       '#00d4ff',
+  '--clr-low':      '#22d3a0',
+  '--clr-medium':   '#f5a524',
+  '--clr-high':     '#ef4444',
   '--clr-critical':'#ff2056',
 }
 
-export default function BuildPage({ params }: Props) {
-  const cpu = CPUs.find(c => c.id === params.cpuId)
-  const gpu = GPUs.find(g => g.id === params.gpuId)
+export default async function BuildPage({ params }: Props) {
+  const resolvedParams = await params
+  const cpu = CPUs.find(c => c.id === resolvedParams.cpuId)
+  const gpu = GPUs.find(g => g.id === resolvedParams.gpuId)
   if (!cpu || !gpu) notFound()
 
   const results = useCases.map(({ key, label }) => ({
