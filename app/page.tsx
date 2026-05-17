@@ -1,10 +1,8 @@
-// app/page.tsx
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import Link from 'next/link'
 import {
-  Zap, Shield, BarChart3, Users, CheckCircle,
-  TrendingUp, Cpu, Monitor, ChevronRight, Star
+  Zap, Shield, BarChart3, TrendingUp, Cpu, Monitor, ChevronRight
 } from 'lucide-react'
 import BottleneckCalculator from '@/components/calculator/BottleneckCalculator'
 import Header from '@/components/layout/Header'
@@ -45,13 +43,6 @@ const webAppSchema = {
     'Upgrade recommendations', 'Shareable results',
   ],
 }
-
-const stats = [
-  { value: '2.8M+', label: 'Builds Analyzed' },
-  { value: '98%',   label: 'Accuracy Rate' },
-  { value: '0',     label: 'Signups Required' },
-  { value: '<1s',   label: 'Results Time' },
-]
 
 const features = [
   {
@@ -141,11 +132,10 @@ export default function HomePage() {
     <>
       <JsonLd data={webAppSchema} />
       <Header />
-      <main id="main-content">
+      <main id="main-content" className="w-full overflow-x-hidden">
 
         {/* ─── Hero ──────────────────────────────────────────────────────────── */}
-        <section className="relative overflow-hidden pt-14 pb-10 px-4">
-          {/* Background grid */}
+        <section className="relative overflow-hidden pt-12 pb-8 px-4 sm:px-6 lg:px-8">
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
@@ -154,23 +144,15 @@ export default function HomePage() {
               maskImage: 'radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%)',
             }}
           />
-          {/* Ambient glow */}
           <div
-            className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-64 pointer-events-none"
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-64 pointer-events-none"
             style={{
               background: 'radial-gradient(ellipse, rgba(0,212,255,0.08) 0%, transparent 70%)',
             }}
           />
 
-          <div className="relative max-w-4xl mx-auto text-center">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[--clr-border-glow] bg-[--clr-bg-card] text-xs text-[--clr-text-secondary] mb-6">
-              <span className="w-2 h-2 rounded-full bg-[--clr-accent] animate-pulse" />
-              <span>Free · No signup · Instant results · {GPUs.length + CPUs.length}+ components</span>
-            </div>
-
-            {/* H1 */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-5 leading-tight">
+          <div className="relative max-w-4xl mx-auto text-center px-2">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-5 leading-tight sm:leading-none">
               Is Your CPU{' '}
               <span
                 className="inline-block"
@@ -181,91 +163,51 @@ export default function HomePage() {
               {' '}Your GPU?
             </h1>
 
-            {/* Subtitle */}
-            <p className="text-lg sm:text-xl text-[--clr-text-secondary] max-w-2xl mx-auto mb-8 leading-relaxed">
+            <p className="text-sm sm:text-lg md:text-xl text-[--clr-text-secondary] max-w-2xl mx-auto mb-2 leading-relaxed">
               Find out in seconds. Select your CPU and GPU, choose your use case,
               and get an instant bottleneck percentage with specific upgrade recommendations.
             </p>
-
-            {/* Social proof row */}
-            <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-[--clr-text-muted] mb-10">
-              <div className="flex items-center gap-1.5">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={12} fill="#f5a524" className="text-[--clr-medium]" />
-                  ))}
-                </div>
-                <span>4.8/5 from 2,800+ users</span>
-              </div>
-              <span className="w-px h-4 bg-[--clr-border]" />
-              <div className="flex items-center gap-1.5">
-                <Users size={12} />
-                <span>2.8M+ builds analyzed</span>
-              </div>
-              <span className="w-px h-4 bg-[--clr-border]" />
-              <div className="flex items-center gap-1.5">
-                <CheckCircle size={12} className="text-[--clr-ok]" />
-                <span>No account required</span>
-              </div>
-            </div>
           </div>
         </section>
 
         {/* ─── Calculator ────────────────────────────────────────────────────── */}
         <section className="max-w-4xl mx-auto px-4 pb-16">
-          <Suspense>
+          <Suspense fallback={<div className="h-96 w-full animate-pulse bg-[--clr-bg-card] rounded-xl" />}>
             <BottleneckCalculator />
           </Suspense>
         </section>
 
-        {/* ─── Stats bar ─────────────────────────────────────────────────────── */}
-        <section className="border-y border-[--clr-border] bg-[--clr-bg-card]">
-          <div className="max-w-4xl mx-auto px-4 py-8">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
-              {stats.map(({ value, label }) => (
-                <div key={label}>
-                  <p
-                    className="text-3xl font-mono font-bold"
-                    style={{ color: '#00d4ff' }}
-                  >
-                    {value}
-                  </p>
-                  <p className="text-xs text-[--clr-text-muted] mt-1">{label}</p>
+        {/* ─── How it Works ─────────────────────────────────────────────────────── */}
+        <section className="border-t border-[--clr-border] bg-[--clr-bg-card]">
+          <div className="max-w-4xl mx-auto px-4 py-16">
+            <div className="text-center md:text-left mb-10">
+              <h2 className="text-2xl font-bold mb-2">How the Calculator Works</h2>
+              <p className="text-[--clr-text-secondary] max-w-xl text-sm leading-relaxed">
+                Three steps to a precise bottleneck analysis — no guesswork, no generic percentages.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {howItWorks.map(({ step, title, desc }) => (
+                <div key={step} className="relative group">
+                  <div className="hidden md:block absolute top-5 left-full h-px border-t border-dashed border-[--clr-border]" style={{ width: 'calc(100% - 3rem)', left: '3.5rem' }} />
+                  <div className="card p-5 h-full border border-[--clr-border] bg-[--clr-bg-base] rounded-xl transition-all">
+                    <div
+                      className="w-9 h-9 rounded-[--radius-sm] flex items-center justify-center text-xs font-bold font-mono mb-4"
+                      style={{
+                        background: 'rgba(0,212,255,0.08)',
+                        border: '1px solid rgba(0,212,255,0.2)',
+                        color: '#00d4ff',
+                      }}
+                    >
+                      {step}
+                    </div>
+                    <h3 className="font-semibold mb-2 text-sm text-[--clr-text-primary]">{title}</h3>
+                    <p className="text-xs text-[--clr-text-secondary] leading-relaxed">{desc}</p>
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* ─── How It Works ──────────────────────────────────────────────────── */}
-        <section className="max-w-4xl mx-auto px-4 py-16">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold mb-2">How the Calculator Works</h2>
-            <p className="text-[--clr-text-secondary] max-w-xl mx-auto text-sm leading-relaxed">
-              Three steps to a precise bottleneck analysis — no guesswork, no generic percentages.
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-3 gap-6">
-            {howItWorks.map(({ step, title, desc }) => (
-              <div key={step} className="relative">
-                {/* Connector line */}
-                <div className="hidden sm:block absolute top-5 left-full w-full h-px border-t border-dashed border-[--clr-border] last:hidden" style={{ width: 'calc(100% - 2rem)', left: '3rem' }} />
-                <div className="card p-5">
-                  <div
-                    className="w-9 h-9 rounded-[--radius-sm] flex items-center justify-center text-xs font-bold font-mono mb-4"
-                    style={{
-                      background: 'rgba(0,212,255,0.08)',
-                      border: '1px solid rgba(0,212,255,0.2)',
-                      color: '#00d4ff',
-                    }}
-                  >
-                    {step}
-                  </div>
-                  <h3 className="font-semibold mb-2 text-sm">{title}</h3>
-                  <p className="text-xs text-[--clr-text-secondary] leading-relaxed">{desc}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </section>
 
@@ -278,9 +220,9 @@ export default function HomePage() {
                 Built for accuracy. Designed for speed. Free forever.
               </p>
             </div>
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {features.map(({ icon, title, desc }) => (
-                <div key={title} className="card-elevated p-5 flex gap-4">
+                <div key={title} className="card-elevated p-5 flex flex-col sm:flex-row gap-4 rounded-xl border border-[--clr-border]">
                   <div
                     className="w-9 h-9 rounded-[--radius-sm] flex items-center justify-center flex-shrink-0 mt-0.5"
                     style={{
@@ -292,7 +234,7 @@ export default function HomePage() {
                     {icon}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm mb-1">{title}</h3>
+                    <h3 className="font-semibold text-sm mb-1 text-[--clr-text-primary]">{title}</h3>
                     <p className="text-xs text-[--clr-text-secondary] leading-relaxed">{desc}</p>
                   </div>
                 </div>
@@ -303,30 +245,28 @@ export default function HomePage() {
 
         {/* ─── Popular builds ────────────────────────────────────────────────── */}
         <section className="max-w-4xl mx-auto px-4 py-16">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-1">Popular Build Combinations</h2>
-              <p className="text-sm text-[--clr-text-secondary]">Click any build to see the full bottleneck analysis</p>
-            </div>
+          <div className="mb-6 text-center sm:text-left">
+            <h2 className="text-2xl font-bold mb-1">Popular Build Combinations</h2>
+            <p className="text-sm text-[--clr-text-secondary]">Click any build to see the full bottleneck analysis</p>
           </div>
-          <div className="grid sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {popularBuilds.map(({ cpu, gpu, label }) => (
               <Link
                 key={`${cpu}-${gpu}`}
                 href={`/build/${cpu}/${gpu}`}
-                className="card p-4 hover:border-[--clr-border-glow] transition-all group flex items-center justify-between gap-3"
+                className="card p-4 hover:border-[--clr-border-glow] transition-all group flex items-center justify-between gap-3 border border-[--clr-border] bg-[--clr-bg-card] rounded-xl"
               >
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold text-[--clr-accent] mb-1">{label}</p>
-                  <div className="flex items-center gap-2 text-sm text-[--clr-text-secondary] flex-wrap">
-                    <span className="flex items-center gap-1">
-                      <Cpu size={12} />
-                      {CPUs.find(c => c.id === cpu)?.name}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm text-[--clr-text-secondary] truncate">
+                    <span className="flex items-center gap-1 truncate">
+                      <Cpu size={12} className="flex-shrink-0" />
+                      <span className="truncate">{CPUs.find(c => c.id === cpu)?.name || cpu}</span>
                     </span>
-                    <span className="text-[--clr-text-muted]">+</span>
-                    <span className="flex items-center gap-1">
-                      <Monitor size={12} />
-                      {GPUs.find(g => g.id === gpu)?.name}
+                    <span className="hidden sm:inline text-[--clr-text-muted]">+</span>
+                    <span className="flex items-center gap-1 truncate">
+                      <Monitor size={12} className="flex-shrink-0" />
+                      <span className="truncate">{GPUs.find(g => g.id === gpu)?.name || gpu}</span>
                     </span>
                   </div>
                 </div>
@@ -339,7 +279,7 @@ export default function HomePage() {
         {/* ─── What is a bottleneck — SEO content ────────────────────────────── */}
         <section className="border-t border-[--clr-border]">
           <div className="max-w-4xl mx-auto px-4 py-16">
-            <div className="grid md:grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
               <div>
                 <h2 className="text-2xl font-bold mb-4">What Is a PC Bottleneck?</h2>
                 <p className="text-[--clr-text-secondary] leading-relaxed mb-4 text-sm">
@@ -370,11 +310,11 @@ export default function HomePage() {
             </div>
 
             {/* Bottleneck scale legend */}
-            <div className="mt-10">
-              <h3 className="font-semibold text-sm mb-4 text-[--clr-text-secondary] uppercase tracking-widest">
+            <div className="mt-12">
+              <h3 className="font-semibold text-xs mb-4 text-[--clr-text-secondary] uppercase tracking-widest text-center sm:text-left">
                 Bottleneck Severity Scale
               </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
                 {[
                   { range: '0–5%',   label: 'No Bottleneck',   color: '#00d4ff', desc: 'Perfect balance' },
                   { range: '6–20%',  label: 'Minor',           color: '#22d3a0', desc: 'Barely noticeable' },
@@ -384,12 +324,12 @@ export default function HomePage() {
                 ].map(({ range, label, color, desc }) => (
                   <div
                     key={range}
-                    className="card p-3 text-center"
-                    style={{ borderTopColor: color, borderTopWidth: 2 }}
+                    className="card p-3 text-center border-t-2 bg-[--clr-bg-card] rounded-lg border-x border-b border-[--clr-border]"
+                    style={{ borderTopColor: color }}
                   >
                     <p className="text-xs font-mono font-bold mb-0.5" style={{ color }}>{range}</p>
-                    <p className="text-xs font-semibold mb-1">{label}</p>
-                    <p className="text-[10px] text-[--clr-text-muted]">{desc}</p>
+                    <p className="text-xs font-semibold mb-1 text-[--clr-text-primary] truncate">{label}</p>
+                    <p className="text-[10px] text-[--clr-text-muted] leading-tight">{desc}</p>
                   </div>
                 ))}
               </div>
@@ -400,16 +340,16 @@ export default function HomePage() {
         {/* ─── FAQ (schema-rich) ─────────────────────────────────────────────── */}
         <section className="border-t border-[--clr-border] bg-[--clr-bg-card]">
           <div className="max-w-4xl mx-auto px-4 py-16">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-8 text-center sm:text-left">
               <h2 className="text-2xl font-bold">Frequently Asked Questions</h2>
-              <Link href="/faq" className="text-sm text-[--clr-accent] hover:underline">
+              <Link href="/faq" className="text-sm text-[--clr-accent] hover:underline font-medium">
                 View all FAQs →
               </Link>
             </div>
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {faqs.map(({ q, a }) => (
-                <div key={q} className="card p-5">
-                  <h3 className="font-semibold text-sm mb-2">{q}</h3>
+                <div key={q} className="card p-5 border border-[--clr-border] bg-[--clr-bg-base] rounded-xl">
+                  <h3 className="font-semibold text-sm mb-2 text-[--clr-text-primary]">{q}</h3>
                   <p className="text-xs text-[--clr-text-secondary] leading-relaxed">{a}</p>
                 </div>
               ))}
@@ -419,39 +359,99 @@ export default function HomePage() {
 
         {/* ─── GPU/CPU directory ─────────────────────────────────────────────── */}
         <section className="max-w-4xl mx-auto px-4 py-16">
-          <h2 className="text-2xl font-bold mb-8 text-center">Hardware Rankings</h2>
-          <div className="grid sm:grid-cols-2 gap-6 mb-6">
-            <RankingTable 
-              title="Top CPUs for Gaming" 
-              description="Best processors ranked by gaming performance."
-              data={cpusJson as any}
-              linkPrefix="cpu"
-            />
-            <RankingTable 
-              title="Top GPUs by FPS" 
-              description="Graphics cards ranked by overall performance."
-              data={gpusJson as any}
-              linkPrefix="gpu"
-            />
+          <h2 className="text-2xl font-bold mb-2 text-center">Hardware Rankings</h2>
+          <p className="text-sm text-[--clr-text-secondary] text-center mb-8">Comprehensive component database overview</p>
+
+          <HardwareDirectory />
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div className="overflow-x-auto pb-2 min-w-0">
+              <RankingTable
+                title="Top CPUs for Gaming"
+                description="Best processors ranked by gaming performance."
+                data={cpusJson as any}
+                linkPrefix="cpu"
+              />
+            </div>
+            <div className="overflow-x-auto pb-2 min-w-0">
+              <RankingTable
+                title="Top GPUs by FPS"
+                description="Graphics cards ranked by overall performance."
+                data={gpusJson as any}
+                linkPrefix="gpu"
+              />
+            </div>
           </div>
-          <div className="grid sm:grid-cols-2 gap-6">
-            <RankingTable 
-              title="Top RAM Rankings" 
-              description="Fastest memory kits for gaming."
-              data={ramJson as any}
-              linkPrefix="ram"
-            />
-            <RankingTable 
-              title="Top SSD Rankings" 
-              description="Fastest storage drives for load times."
-              data={storageJson as any}
-              linkPrefix="storage"
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="overflow-x-auto pb-2 min-w-0">
+              <RankingTable
+                title="Top RAM Rankings"
+                description="Fastest memory kits for gaming."
+                data={ramJson as any}
+                linkPrefix="ram"
+              />
+            </div>
+            <div className="overflow-x-auto pb-2 min-w-0">
+              <RankingTable
+                title="Top SSD Rankings"
+                description="Fastest storage drives for load times."
+                data={storageJson as any}
+                linkPrefix="storage"
+              />
+            </div>
           </div>
         </section>
 
       </main>
       <Footer />
     </>
+  )
+}
+
+{/* ─── Embedded Hardware Directory Module ────────────────────────────── */}
+function HardwareDirectory() {
+  const categories = [
+    { name: 'Processors', count: CPUs.length, icon: <Cpu size={20} />, list: CPUs.slice(0, 5), type: 'cpu' },
+    { name: 'Graphics Cards', count: GPUs.length, icon: <Monitor size={20} />, list: GPUs.slice(0, 5), type: 'gpu' }
+  ]
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
+      {categories.map((cat) => (
+        <div key={cat.name} className="card p-5 sm:p-6 bg-[--clr-bg-card] border border-[--clr-border] rounded-xl flex flex-col justify-between min-w-0">
+          <div>
+            <div className="flex items-center justify-between gap-2 mb-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 rounded-lg bg-[rgba(0,212,255,0.06)] border border-[rgba(0,212,255,0.15)] text-[#00d4ff] flex-shrink-0">
+                  {cat.icon}
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-sm sm:text-base text-[--clr-text-primary] truncate">{cat.name}</h3>
+                  <p className="text-xs text-[--clr-text-muted] truncate">{cat.count} elements indexed</p>
+                </div>
+              </div>
+              <Link href={`/${cat.type}`} className="text-xs text-[#00d4ff] hover:underline font-mono flex-shrink-0">
+                View All
+              </Link>
+            </div>
+
+            <div className="space-y-1.5 mt-4">
+              {cat.list.map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/${cat.type}/${item.id}`}
+                  className="flex items-center justify-between p-2 rounded-md hover:bg-[rgba(255,255,255,0.02)] border border-transparent hover:border-[--clr-border] transition-all group min-w-0"
+                >
+                  <span className="text-xs text-[--clr-text-secondary] truncate pr-2 group-hover:text-[--clr-text-primary]">
+                    {item.name}
+                  </span>
+                  <ChevronRight size={14} className="text-[--clr-text-muted] group-hover:text-[#00d4ff] transition-colors flex-shrink-0" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }

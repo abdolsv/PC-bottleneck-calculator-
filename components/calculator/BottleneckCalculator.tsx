@@ -1,4 +1,3 @@
-// components/calculator/BottleneckCalculator.tsx
 'use client'
 import { useState, useCallback, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -13,13 +12,12 @@ import { ResultDisplay } from './ResultDisplay'
 import { Button } from '@/components/ui/Button'
 import { saveBuild, getSavedBuilds, type SavedBuild } from '@/lib/build-storage'
 
-const RAM_OPTIONS = [8, 16, 32, 64]
+const RAM_OPTIONS = [8, 16, 32, 64] as const
 
-// Advanced options type
 interface AdvancedOptions {
-  cpuOverclock:  number  // % boost e.g. 10 = +10%
-  gpuOverclock:  number  // % boost
-  ramSpeed:      'ddr4-3200' | 'ddr4-3600' | 'ddr5-5600' | 'ddr5-6000'
+  cpuOverclock:    number   // % boost
+  gpuOverclock:    number   // % boost
+  ramSpeed:        'ddr4-3200' | 'ddr4-3600' | 'ddr5-5600' | 'ddr5-6000'
   thermalThrottle: boolean
 }
 
@@ -37,51 +35,58 @@ const RAM_SPEED_LABELS: Record<string, string> = {
   'ddr5-6000': 'DDR5-6000',
 }
 
+const RAM_NOTES: Partial<Record<number, string>> = {
+  8:  'Minimum',
+  16: 'Recommended',
+  32: 'Sweet spot',
+  64: 'Pro / future-proof',
+}
+
+const DEFAULT_ADVANCED: AdvancedOptions = {
+  cpuOverclock:    0,
+  gpuOverclock:    0,
+  ramSpeed:        'ddr4-3200',
+  thermalThrottle: false,
+}
+
 export default function BottleneckCalculator() {
   const searchParams = useSearchParams()
-  const router = useRouter()
+  const router       = useRouter()
 
   const [selectedCpu, setSelectedCpu] = useState<CPU | null>(null)
   const [selectedGpu, setSelectedGpu] = useState<GPU | null>(null)
-  const [useCase, setUseCase] = useState<UseCase>('gaming-1440p')
-  const [ram, setRam] = useState<number>(16)
-  const [result, setResult] = useState<BottleneckResult | null>(null)
+  const [useCase,     setUseCase]     = useState<UseCase>('gaming-1440p')
+  const [ram,         setRam]         = useState<number>(16)
+  const [result,      setResult]      = useState<BottleneckResult | null>(null)
   const [calculating, setCalculating] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
-  const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>([])
-  const [justSaved, setJustSaved] = useState(false)
+  const [savedBuilds,  setSavedBuilds]  = useState<SavedBuild[]>([])
+  const [justSaved,    setJustSaved]    = useState(false)
+  const [advanced,     setAdvanced]     = useState<AdvancedOptions>(DEFAULT_ADVANCED)
 
-  const [advanced, setAdvanced] = useState<AdvancedOptions>({
-    cpuOverclock:    0,
-    gpuOverclock:    0,
-    ramSpeed:        'ddr4-3200',
-    thermalThrottle: false,
-  })
-
-  // Load from URL params on mount
+  // Hydrate state from URL params on mount
   useEffect(() => {
-    const cpuParam  = searchParams.get('cpu')
-    const gpuParam  = searchParams.get('gpu')
-    const useParam  = searchParams.get('use') as UseCase
-    const ramParam  = searchParams.get('ram')
+    const cpuParam = searchParams.get('cpu')
+    const gpuParam = searchParams.get('gpu')
+    const useParam = searchParams.get('use') as UseCase | null
+    const ramParam = searchParams.get('ram')
 
     if (cpuParam) setSelectedCpu(CPUs.find(c => c.id === cpuParam) ?? null)
     if (gpuParam) setSelectedGpu(GPUs.find(g => g.id === gpuParam) ?? null)
     if (useParam) setUseCase(useParam)
-    if (ramParam) setRam(Number(ramParam))
+    if (ramParam) {
+      const parsed = Number(ramParam)
+      if (RAM_OPTIONS.includes(parsed as typeof RAM_OPTIONS[number])) setRam(parsed)
+    }
   }, [searchParams])
 
-  // Load saved builds
-  useEffect(() => {
-    setSavedBuilds(getSavedBuilds())
-  }, [])
+  useEffect(() => { setSavedBuilds(getSavedBuilds()) }, [])
 
   const handleCalculate = useCallback(() => {
     if (!selectedCpu || !selectedGpu) return
     setCalculating(true)
 
     setTimeout(() => {
-      // Apply overclocking and thermal throttle modifiers to a copy of the components
       const modifiedCpu = {
         ...selectedCpu,
         benchmarkScore: Math.min(100,
@@ -97,25 +102,21 @@ export default function BottleneckCalculator() {
         ),
       }
 
-      // RAM speed gives a small performance boost in memory-sensitive games
       const ramSpeedBonus = RAM_SPEED_BONUS[advanced.ramSpeed] ?? 0
-
       const res = calculateBottleneck(modifiedCpu, modifiedGpu, useCase, ram)
 
-      // Apply RAM speed bonus (reduces bottleneck slightly)
       const finalResult: BottleneckResult = {
         ...res,
-        percentage: Math.max(0, res.percentage - ramSpeedBonus),
+        percentage:     Math.max(0, res.percentage - ramSpeedBonus),
         efficiencyScore: Math.min(100, res.efficiencyScore + ramSpeedBonus),
       }
 
       setResult(finalResult)
       setCalculating(false)
 
-      // Update URL for shareability
       const params = new URLSearchParams({
         cpu: selectedCpu.id, gpu: selectedGpu.id,
-        use: useCase, ram: String(ram),
+        use: useCase,        ram: String(ram),
       })
       router.replace(`?${params.toString()}`, { scroll: false })
     }, 450)
@@ -127,20 +128,21 @@ export default function BottleneckCalculator() {
     setUseCase('gaming-1440p')
     setRam(16)
     setResult(null)
-    setAdvanced({ cpuOverclock: 0, gpuOverclock: 0, ramSpeed: 'ddr4-3200', thermalThrottle: false })
+    setAdvanced(DEFAULT_ADVANCED)
     router.replace('/', { scroll: false })
   }
 
   const handleSave = () => {
     if (!selectedCpu || !selectedGpu || !result) return
-    const saved = saveBuild({
+    saveBuild({
       name: `${selectedCpu.name.split(' ').slice(-1)[0]} + ${selectedGpu.name.split(' ').slice(-1)[0]}`,
-      cpuId: selectedCpu.id, gpuId: selectedGpu.id,
+      cpuId:   selectedCpu.id,
+      gpuId:   selectedGpu.id,
       useCase, ram,
       result: {
-        percentage:     result.percentage,
-        label:          result.label,
-        severity:       result.severity,
+        percentage:      result.percentage,
+        label:           result.label,
+        severity:        result.severity,
         efficiencyScore: result.efficiencyScore,
       },
     })
@@ -150,13 +152,16 @@ export default function BottleneckCalculator() {
   }
 
   const canCalculate = !!selectedCpu && !!selectedGpu
-  const hasResult = !!result && !calculating
+  const hasResult    = !!result && !calculating
+  const hasActiveOC  = advanced.cpuOverclock > 0 || advanced.gpuOverclock > 0
 
   return (
     <div className="space-y-4">
 
-      {/* ─── Input card ─────────────────────────────────────────────────────── */}
-      <div className="card p-5 sm:p-6">
+      {/* ─── Input card ──────────────────────────────────────────────── */}
+      <div className="card p-4 sm:p-6">
+
+        {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-sm font-semibold uppercase tracking-widest text-[--clr-text-secondary]">
             Select Components
@@ -172,8 +177,8 @@ export default function BottleneckCalculator() {
           )}
         </div>
 
-        {/* CPU + GPU selectors */}
-        <div className="grid sm:grid-cols-2 gap-4 mb-5">
+        {/* CPU + GPU selectors — stack on mobile, side-by-side on sm+ */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
           <ComponentSelector<CPU>
             label="CPU (Processor)"
             items={CPUs}
@@ -197,37 +202,41 @@ export default function BottleneckCalculator() {
         {/* Use case */}
         <UseCaseSelector selected={useCase} onChange={setUseCase} />
 
-        {/* RAM */}
+        {/* RAM — 2×2 grid on the narrowest phones, 4-column on sm+ */}
         <div className="mt-4">
           <label className="block text-xs font-medium text-[--clr-text-secondary] uppercase tracking-widest mb-2">
             System RAM
           </label>
-          <div className="flex gap-2">
-            {RAM_OPTIONS.map(gb => (
-              <button
-                key={gb}
-                onClick={() => setRam(gb)}
-                className="flex-1 py-2.5 rounded-[--radius-sm] text-xs font-semibold border transition-all"
-                style={{
-                  background: ram === gb ? 'rgba(0,212,255,0.1)' : 'var(--clr-bg-elevated)',
-                  borderColor: ram === gb ? 'rgba(0,212,255,0.6)' : 'var(--clr-border)',
-                  color: ram === gb ? '#00d4ff' : 'var(--clr-text-secondary)',
-                }}
-              >
-                {gb}GB
-                {gb === 16 && <span className="block text-[9px] opacity-60 mt-0.5">Recommended</span>}
-                {gb === 32 && <span className="block text-[9px] opacity-60 mt-0.5">Sweet spot</span>}
-              </button>
-            ))}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {RAM_OPTIONS.map(gb => {
+              const active = ram === gb
+              return (
+                <button
+                  key={gb}
+                  onClick={() => setRam(gb)}
+                  className="py-2.5 rounded-[--radius-sm] text-xs font-semibold border transition-all"
+                  style={{
+                    background:   active ? 'rgba(0,212,255,0.1)' : 'var(--clr-bg-elevated)',
+                    borderColor:  active ? 'rgba(0,212,255,0.6)' : 'var(--clr-border)',
+                    color:        active ? '#00d4ff'              : 'var(--clr-text-secondary)',
+                  }}
+                >
+                  {gb}GB
+                  {RAM_NOTES[gb] && (
+                    <span className="block text-[9px] opacity-60 mt-0.5">{RAM_NOTES[gb]}</span>
+                  )}
+                </button>
+              )
+            })}
           </div>
           {ram === 8 && (
             <p className="text-[11px] text-[--clr-medium] mt-2 flex items-center gap-1.5">
-              ⚠ 8GB RAM can cause stuttering in modern games — consider upgrading to 16GB
+              ⚠ 8 GB can cause stuttering in modern games — consider upgrading to 16 GB
             </p>
           )}
         </div>
 
-        {/* Advanced options toggle */}
+        {/* Advanced options */}
         <div className="mt-4">
           <button
             onClick={() => setShowAdvanced(v => !v)}
@@ -235,8 +244,11 @@ export default function BottleneckCalculator() {
           >
             <Settings2 size={13} />
             {showAdvanced ? 'Hide' : 'Show'} Advanced Options
-            {(advanced.cpuOverclock > 0 || advanced.gpuOverclock > 0) && (
-              <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold" style={{ background: 'rgba(0,212,255,0.2)', color: '#00d4ff' }}>
+            {hasActiveOC && (
+              <span
+                className="px-1.5 py-0.5 rounded-full text-[9px] font-bold"
+                style={{ background: 'rgba(0,212,255,0.2)', color: '#00d4ff' }}
+              >
                 ACTIVE
               </span>
             )}
@@ -245,16 +257,14 @@ export default function BottleneckCalculator() {
           {showAdvanced && (
             <div className="mt-3 p-4 rounded-[--radius-md] border border-dashed border-[--clr-border] space-y-4">
               <p className="text-xs text-[--clr-text-muted]">
-                Fine-tune with real-world modifiers. These affect your benchmark scores and bottleneck calculation.
+                Fine-tune with real-world modifiers. These affect benchmark scores and the bottleneck calculation.
               </p>
 
-              {/* CPU OC slider */}
+              {/* CPU overclock */}
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <label className="text-xs text-[--clr-text-secondary]">CPU Overclock</label>
-                  <span className="text-xs font-mono text-[--clr-accent]">
-                    +{advanced.cpuOverclock}%
-                  </span>
+                  <span className="text-xs font-mono text-[--clr-accent]">+{advanced.cpuOverclock}%</span>
                 </div>
                 <input
                   type="range" min={0} max={30} step={5}
@@ -267,13 +277,11 @@ export default function BottleneckCalculator() {
                 </div>
               </div>
 
-              {/* GPU OC slider */}
+              {/* GPU overclock */}
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <label className="text-xs text-[--clr-text-secondary]">GPU Overclock</label>
-                  <span className="text-xs font-mono text-[--clr-accent]">
-                    +{advanced.gpuOverclock}%
-                  </span>
+                  <span className="text-xs font-mono text-[--clr-accent]">+{advanced.gpuOverclock}%</span>
                 </div>
                 <input
                   type="range" min={0} max={20} step={5}
@@ -286,7 +294,7 @@ export default function BottleneckCalculator() {
                 </div>
               </div>
 
-              {/* RAM speed */}
+              {/* RAM speed — 2-col on mobile, 4-col on sm+ */}
               <div>
                 <label className="text-xs text-[--clr-text-secondary] mb-1.5 block">RAM Speed</label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
@@ -296,9 +304,9 @@ export default function BottleneckCalculator() {
                       onClick={() => setAdvanced(v => ({ ...v, ramSpeed: speed as AdvancedOptions['ramSpeed'] }))}
                       className="py-2 text-[10px] font-medium rounded-[--radius-sm] border transition-all"
                       style={{
-                        background: advanced.ramSpeed === speed ? 'rgba(0,212,255,0.08)' : 'var(--clr-bg)',
-                        borderColor: advanced.ramSpeed === speed ? 'rgba(0,212,255,0.4)' : 'var(--clr-border)',
-                        color: advanced.ramSpeed === speed ? '#00d4ff' : 'var(--clr-text-secondary)',
+                        background:  advanced.ramSpeed === speed ? 'rgba(0,212,255,0.08)' : 'var(--clr-bg)',
+                        borderColor: advanced.ramSpeed === speed ? 'rgba(0,212,255,0.4)'  : 'var(--clr-border)',
+                        color:       advanced.ramSpeed === speed ? '#00d4ff'               : 'var(--clr-text-secondary)',
                       }}
                     >
                       {RAM_SPEED_LABELS[speed]}
@@ -308,14 +316,16 @@ export default function BottleneckCalculator() {
               </div>
 
               {/* Thermal throttle toggle */}
-              <label className="flex items-center justify-between cursor-pointer">
-                <div>
+              <label className="flex items-center justify-between gap-4 cursor-pointer">
+                <div className="min-w-0">
                   <p className="text-xs text-[--clr-text-secondary]">CPU Thermal Throttling</p>
-                  <p className="text-[10px] text-[--clr-text-muted]">
+                  <p className="text-[10px] text-[--clr-text-muted] leading-relaxed">
                     Poor cooler or high ambient temps — applies ~8% performance penalty
                   </p>
                 </div>
                 <div
+                  role="switch"
+                  aria-checked={advanced.thermalThrottle}
                   className="w-10 h-5 rounded-full relative transition-colors cursor-pointer flex-shrink-0"
                   style={{
                     background: advanced.thermalThrottle ? '#ef4444' : 'var(--clr-bg-elevated)',
@@ -324,7 +334,7 @@ export default function BottleneckCalculator() {
                   onClick={() => setAdvanced(v => ({ ...v, thermalThrottle: !v.thermalThrottle }))}
                 >
                   <span
-                    className="absolute top-0.5 w-4 h-4 rounded-full transition-transform"
+                    className="absolute top-0.5 w-4 h-4 rounded-full transition-all duration-200"
                     style={{
                       background: 'white',
                       left: advanced.thermalThrottle ? 'calc(100% - 18px)' : '2px',
@@ -337,7 +347,7 @@ export default function BottleneckCalculator() {
         </div>
 
         {/* CTA */}
-        <div className="mt-5 flex gap-2">
+        <div className="mt-5 flex flex-col xs:flex-row gap-2">
           <Button
             size="lg"
             className="flex-1"
@@ -347,7 +357,7 @@ export default function BottleneckCalculator() {
             rightIcon={<ChevronRight size={16} />}
             leftIcon={<Zap size={16} />}
           >
-            {calculating ? 'Analyzing Build...' : 'Calculate Bottleneck'}
+            {calculating ? 'Analyzing Build…' : 'Calculate Bottleneck'}
           </Button>
 
           {hasResult && (
@@ -356,7 +366,7 @@ export default function BottleneckCalculator() {
               variant="secondary"
               onClick={handleSave}
               leftIcon={justSaved ? <Bookmark size={16} /> : <BookmarkPlus size={16} />}
-              className="flex-shrink-0"
+              className="xs:flex-shrink-0"
             >
               {justSaved ? 'Saved!' : 'Save'}
             </Button>
@@ -374,12 +384,12 @@ export default function BottleneckCalculator() {
         )}
       </div>
 
-      {/* ─── Result ─────────────────────────────────────────────────────────── */}
+      {/* ─── Result ──────────────────────────────────────────────────── */}
       {result && selectedCpu && selectedGpu && !calculating && (
         <ResultDisplay result={result} cpu={selectedCpu} gpu={selectedGpu} />
       )}
 
-      {/* ─── Saved builds ────────────────────────────────────────────────────── */}
+      {/* ─── Saved builds ────────────────────────────────────────────── */}
       {savedBuilds.length > 0 && (
         <details className="card p-4">
           <summary className="text-xs font-semibold uppercase tracking-widest text-[--clr-text-secondary] cursor-pointer select-none list-none flex items-center gap-2">
@@ -390,11 +400,13 @@ export default function BottleneckCalculator() {
             {savedBuilds.map(build => (
               <div
                 key={build.id}
-                className="flex items-center justify-between py-2 border-t border-[--clr-border] text-xs"
+                className="flex items-center justify-between py-2 border-t border-[--clr-border] gap-3"
               >
-                <div>
-                  <p className="font-medium text-[--clr-text-primary]">{build.name}</p>
-                  <p className="text-[--clr-text-muted]">{build.result.label} · {build.result.percentage}% bottleneck</p>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-[--clr-text-primary] truncate">{build.name}</p>
+                  <p className="text-[11px] text-[--clr-text-muted]">
+                    {build.result.label} · {build.result.percentage}% bottleneck
+                  </p>
                 </div>
                 <button
                   onClick={() => {
@@ -405,7 +417,7 @@ export default function BottleneckCalculator() {
                     setUseCase(build.useCase as UseCase)
                     setRam(build.ram)
                   }}
-                  className="px-2 py-1 rounded-[--radius-sm] text-[--clr-accent] border border-[rgba(0,212,255,0.3)] hover:bg-[rgba(0,212,255,0.08)] transition-colors"
+                  className="flex-shrink-0 px-2 py-1 rounded-[--radius-sm] text-xs text-[--clr-accent] border border-[rgba(0,212,255,0.3)] hover:bg-[rgba(0,212,255,0.08)] transition-colors"
                 >
                   Load
                 </button>

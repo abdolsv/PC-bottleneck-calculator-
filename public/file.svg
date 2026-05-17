@@ -1,1 +1,19 @@
-<svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%" fill="none">
+  <!-- Ambient Core Glow -->
+  <circle cx="64" cy="64" r="32" fill="#00d4ff" opacity="0.15" filter="blur(16px)"/>
+  
+  <!-- Outer Connection Traces -->
+  <path d="M64 12V24M64 104V116M12 64H24M104 64H116M36 12V24M92 12V24M36 104V116M92 104V116M12 36H24M12 92H24M104 36H116M104 92H116" stroke="#2a2d38" stroke-width="3" stroke-linecap="round"/>
+  <path d="M64 12V20M64 108V116M12 64H20M108 64H116" stroke="#00d4ff" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- Main CPU/GPU Die Body -->
+  <rect x="28" y="28" width="72" height="72" rx="10" fill="#111318" stroke="#2a2d38" stroke-width="3"/>
+  
+  <!-- Inner Circuit Accent Ring -->
+  <rect x="36" y="36" width="56" height="56" rx="6" stroke="#00d4ff" stroke-width="2" stroke-opacity="0.3" stroke-dasharray="4 4"/>
+  
+  <!-- Dynamic Bottleneck Core (Lightning/Data Flow) -->
+  <path d="M68 44L48 68H64L60 84L80 60H64L68 44Z" fill="#00d4ff" stroke="#00d4ff" stroke-width="2" stroke-linejoin="round">
+    <animate attributeName="opacity" values="0.75;1;0.75" dur="3s" repeatCount="indefinite"/>
+  </path>
+</svg>

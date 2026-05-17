@@ -18,7 +18,13 @@ interface RankingTableProps {
 }
 
 export function RankingTable({ title, description, data, linkPrefix, limit = 10 }: RankingTableProps) {
-  const topItems = data.slice(0, limit)
+  // 1. Deduplicate items by ID to prevent key collision crashes
+  const uniqueData = data.filter(
+    (item, index, self) => self.findIndex((t) => t.id === item.id) === index
+  )
+
+  // 2. Slice the cleaned data up to the requested limit
+  const topItems = uniqueData.slice(0, limit)
 
   return (
     <div className="card-elevated p-6 flex flex-col h-full">
@@ -39,12 +45,16 @@ export function RankingTable({ title, description, data, linkPrefix, limit = 10 
           </thead>
           <tbody>
             {topItems.map((item, index) => (
-              <tr key={item.id} className="border-b border-[--clr-border] last:border-0 hover:bg-[rgba(255,255,255,0.02)] transition-colors">
+              /* item.id is now safe to use as a unique key */
+              <tr 
+                key={item.id} 
+                className="border-b border-[--clr-border] last:border-0 hover:bg-[rgba(255,255,255,0.02)] transition-colors"
+              >
                 <td className="py-2.5 px-3">
                   <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
-                    index === 0 ? 'bg-[#f5a524] text-black' : 
-                    index === 1 ? 'bg-[#c0c0c0] text-black' : 
-                    index === 2 ? 'bg-[#cd7f32] text-black' : 
+                    index === 0 ? 'bg-[#f5a524] text-black' :
+                    index === 1 ? 'bg-[#c0c0c0] text-black' :
+                    index === 2 ? 'bg-[#cd7f32] text-black' :
                     'bg-[--clr-bg-elevated] text-[--clr-text-secondary]'
                   }`}>
                     {index + 1}

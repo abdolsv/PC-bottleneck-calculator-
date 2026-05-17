@@ -97,7 +97,7 @@ export const GAMES: Game[] = [
       recommended: { cpuScore: 72, gpuScore: 75, ramGb: 16 },
       ultra:       { cpuScore: 90, gpuScore: 92, ramGb: 32 },
     },
-    tags: ['simulation', 'cpu-intensive', 'demanding', 'single-player'],
+    tags: ['simulation', 'cpu-intensive', 'demanding', 'multiplayer'],
     isCompetitive: false,
     hasRayTracing: false,
     apiSupport: ['DirectX 12'],
@@ -172,7 +172,7 @@ export const GAMES: Game[] = [
     tags: ['shooter', 'co-op', 'third-person', 'multiplayer'],
     isCompetitive: false,
     hasRayTracing: false,
-    apiSupport: ['Vulkan'],
+    apiSupport: ['DirectX 12'],
   },
   {
     id: 'baldurs-gate-3',

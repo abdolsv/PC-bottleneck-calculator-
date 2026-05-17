@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Cpu } from 'lucide-react'
 import { SITE_NAME } from '@/lib/constants'
+import { footerLinks } from '@/lib/navigation-data'
 
 const Twitter = ({ size = 24 }: { size?: number }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" /></svg>
@@ -14,34 +15,13 @@ const Youtube = ({ size = 24 }: { size?: number }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17z" /><path d="m10 15 5-3-5-3z" /></svg>
 );
 
-const footerLinks = {
-  Tools: [
-    { label: 'Bottleneck Calculator', href: '/' },
-    { label: 'GPU Comparison', href: '/gpu' },
-    { label: 'CPU Comparison', href: '/cpu' },
-  ],
-  Learn: [
-    { label: 'FAQ', href: '/faq' },
-    { label: 'Games', href: '/games' },
-    { label: 'About', href: '/about' },
-  ],
-  Popular: [
-    { label: 'RTX 4090 Bottleneck', href: '/gpu/rtx-4090' },
-    { label: 'RTX 4070 Bottleneck', href: '/gpu/rtx-4070' },
-    { label: 'Ryzen 7 5800X3D', href: '/cpu/r7-5800x3d' },
-    { label: 'i5-13600K Guide', href: '/cpu/i5-13600k' },
-  ],
-}
-
 export default function Footer() {
   const year = new Date().getFullYear()
 
   return (
     <footer className="border-t border-[--clr-border] mt-16">
       <div className="max-w-6xl mx-auto px-4 py-12">
-
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
-
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-3">
               <div className="w-7 h-7 rounded-[--radius-sm] bg-[--clr-accent-dim] border border-[--clr-accent] flex items-center justify-center">
@@ -54,18 +34,14 @@ export default function Footer() {
             <p className="text-xs text-[--clr-text-muted] leading-relaxed mb-4">
               Free, instant CPU & GPU bottleneck analysis. No signup. No BS. Just results.
             </p>
-
             <div className="flex gap-3">
-              <a href="https://twitter.com/pcbottleneck" target="_blank" rel="noopener noreferrer"
-                className="w-8 h-8 rounded-[--radius-sm] border border-[--clr-border] flex items-center justify-center text-[--clr-text-muted] hover:text-[--clr-accent] hover:border-[--clr-accent] transition-colors">
+              <a href="https://twitter.com/pcbottleneck" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-[--radius-sm] border border-[--clr-border] flex items-center justify-center text-[--clr-text-muted] hover:text-[--clr-accent] hover:border-[--clr-accent] transition-colors">
                 <Twitter size={14} />
               </a>
-              <a href="https://github.com/yourusername/pc-bottleneck-calculator" target="_blank" rel="noopener noreferrer"
-                className="w-8 h-8 rounded-[--radius-sm] border border-[--clr-border] flex items-center justify-center text-[--clr-text-muted] hover:text-[--clr-accent] hover:border-[--clr-accent] transition-colors">
+              <a href="https://github.com/yourusername/pc-bottleneck-calculator" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-[--radius-sm] border border-[--clr-border] flex items-center justify-center text-[--clr-text-muted] hover:text-[--clr-accent] hover:border-[--clr-accent] transition-colors">
                 <Github size={14} />
               </a>
-              <a href="https://youtube.com/@pcbottleneck" target="_blank" rel="noopener noreferrer"
-                className="w-8 h-8 rounded-[--radius-sm] border border-[--clr-border] flex items-center justify-center text-[--clr-text-muted] hover:text-[--clr-accent] hover:border-[--clr-accent] transition-colors">
+              <a href="https://youtube.com/@pcbottleneck" target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-[--radius-sm] border border-[--clr-border] flex items-center justify-center text-[--clr-text-muted] hover:text-[--clr-accent] hover:border-[--clr-accent] transition-colors">
                 <Youtube size={14} />
               </a>
             </div>
@@ -79,10 +55,7 @@ export default function Footer() {
               <ul className="space-y-2">
                 {links.map(({ label, href }) => (
                   <li key={href}>
-                    <Link
-                      href={href}
-                      className="text-xs text-[--clr-text-muted] hover:text-[--clr-accent] transition-colors"
-                    >
+                    <Link href={href} className="text-xs text-[--clr-text-muted] hover:text-[--clr-accent] transition-colors">
                       {label}
                     </Link>
                   </li>

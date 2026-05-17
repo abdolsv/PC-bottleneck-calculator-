@@ -219,10 +219,14 @@ export function ComponentSelector<T extends Item>({
                 >
                   {group}
                 </div>
-                {groupItems.map(item => (
+                const uniqueGroupItems = groupItems.filter(
+                  (item, index, self) => self.findIndex(i => i.id === item.id) === index
+                );
+                
+                {uniqueGroupItems.map(item => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between px-4 py-2.5 cursor-pointer transition-colors"
+                    className="flex items-center justify-between px-4 py-2.5"
                     style={{
                       backgroundColor: selected?.id === item.id ? 'rgba(0,212,255,0.12)' : 'transparent',
                     }}
@@ -274,3 +278,4 @@ export function ComponentSelector<T extends Item>({
     </div>
   )
 }
+

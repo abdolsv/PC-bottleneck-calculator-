@@ -1,3 +1,4 @@
+// lib/hardware-data.ts
 export interface CPU {
   id: string
   name: string
@@ -5,11 +6,11 @@ export interface CPU {
   generation: string
   cores: number
   threads: number
-  baseClock: number    // GHz
-  boostClock: number   // GHz
-  tdp: number          // Watts
-  tier: 1 | 2 | 3 | 4 | 5  // 5 = flagship, 1 = budget
-  benchmarkScore: number    // Normalized 0–100 (relative to current gen)
+  baseClock: number
+  boostClock: number
+  tdp: number
+  tier: 1 | 2 | 3 | 4 | 5
+  benchmarkScore: number
   releaseYear: number
   socket: string
 }
@@ -18,9 +19,9 @@ export interface GPU {
   id: string
   name: string
   brand: 'NVIDIA' | 'AMD' | 'Intel'
-  vram: number         // GB
+  vram: number
   tier: 1 | 2 | 3 | 4 | 5
-  benchmarkScore: number  // 0–100 normalized
+  benchmarkScore: number
   tdp: number
   releaseYear: number
   targetResolution: '1080p' | '1440p' | '4K' | 'all'
@@ -29,33 +30,74 @@ export interface GPU {
 import cpusJson from '../data/cpus.json'
 import gpusJson from '../data/gpus.json'
 
-export const CPUs: CPU[] = cpusJson.map((c: any) => ({
-  id: c.id,
-  name: c.name,
-  brand: c.brand as 'Intel' | 'AMD',
-  generation: 'Unknown',
-  cores: 0,
-  threads: 0,
-  baseClock: 0,
-  boostClock: 0,
-  tdp: 0,
-  tier: c.rank < 20 ? 5 : c.rank < 50 ? 4 : c.rank < 150 ? 3 : c.rank < 300 ? 2 : 1,
-  benchmarkScore: c.score,
-  releaseYear: 2020,
-  socket: 'Unknown',
-}))
+export const CPUs: CPU[] = cpusJson.map((c: any) => {
+  const isAmd = c.brand?.toUpperCase() === 'AMD'
+  const nameLower = (c.name || '').toLowerCase()
+  
+  // --- INLINE INTELLIGENT SEGMENTATION ENGINE ---
+  let calculatedGen = 'Legacy Chips'
+  
+  if (isAmd) {
+    if (nameLower.includes('ryzen 9')) calculatedGen = 'Ryzen 9 Series'
+    else if (nameLower.includes('ryzen 7')) calculatedGen = 'Ryzen 7 Series'
+    else if (nameLower.includes('ryzen 5')) calculatedGen = 'Ryzen 5 Series'
+    else if (nameLower.includes('ryzen 3')) calculatedGen = 'Ryzen 3 Series'
+    else if (nameLower.includes('fx-') || nameLower.includes('phenom')) calculatedGen = 'FX & Phenom Legacy'
+    else if (nameLower.includes('apu') || nameLower.includes('athlon')) calculatedGen = 'Athlon & APU Series'
+  } else {
+    // Intel Structural Parsing
+    if (nameLower.includes('core i9')) calculatedGen = 'Core i9 High-End'
+    else if (nameLower.includes('core i7')) calculatedGen = 'Core i7 Series'
+    else if (nameLower.includes('core i5')) calculatedGen = 'Core i5 Series'
+    else if (nameLower.includes('core i3')) calculatedGen = 'Core i3 Series'
+    else if (nameLower.includes('xeon')) calculatedGen = 'Xeon Workstation'
+    else if (nameLower.includes('pentium')) calculatedGen = 'Pentium Desktop'
+    else if (nameLower.includes('celeron')) calculatedGen = 'Celeron Budget'
+    else if (nameLower.includes('atom')) calculatedGen = 'Atom Embedded'
+  }
 
-export const GPUs: GPU[] = gpusJson.map((g: any) => ({
-  id: g.id,
-  name: g.name,
-  brand: g.brand as 'NVIDIA' | 'AMD' | 'Intel',
-  vram: 8,
-  tier: g.rank < 20 ? 5 : g.rank < 50 ? 4 : g.rank < 150 ? 3 : g.rank < 300 ? 2 : 1,
-  benchmarkScore: g.score,
-  tdp: 0,
-  releaseYear: 2020,
-  targetResolution: 'all',
-}))
+  return {
+    id: c.id,
+    name: c.name,
+    brand: (isAmd ? 'AMD' : 'Intel') as 'Intel' | 'AMD',
+    generation: calculatedGen, // This is no longer hardcoded to 'Unknown'!
+    cores: c.cores || 2, 
+    threads: c.threads || 2,
+    baseClock: c.baseClock || 2.0,
+    boostClock: c.boostClock || 2.5,
+    tdp: c.tdp || 65,
+    tier: c.rank < 20 ? 5 : c.rank < 50 ? 4 : c.rank < 150 ? 3 : c.rank < 300 ? 2 : 1,
+    benchmarkScore: c.score,
+    releaseYear: c.releaseYear || 2020,
+    socket: c.socket || 'Dynamic',
+  }
+})
+
+export const GPUs: GPU[] = gpusJson.map((g: any) => {
+  let mappedBrand: 'NVIDIA' | 'AMD' | 'Intel' = 'NVIDIA'
+  const rawBrand = g.brand?.toUpperCase() || ''
+
+  if (rawBrand.includes('AMD')) mappedBrand = 'AMD'
+  else if (rawBrand.includes('INTEL')) mappedBrand = 'Intel'
+  
+  let calculatedTier: 1 | 2 | 3 | 4 | 5 = 1
+  if (g.rank < 20) calculatedTier = 5
+  else if (g.rank < 50) calculatedTier = 4
+  else if (g.rank < 150) calculatedTier = 3
+  else if (g.rank < 300) calculatedTier = 2
+
+  return {
+    id: g.id,
+    name: g.name,
+    brand: mappedBrand,
+    vram: g.vram || 8,
+    tier: calculatedTier,
+    benchmarkScore: g.score || 1, 
+    tdp: g.tdp || 150,
+    releaseYear: g.releaseYear || 2020,
+    targetResolution: 'all',
+  }
+})
 
 export type UseCase = 'gaming-1080p' | 'gaming-1440p' | 'gaming-4k' | 'streaming' | 'video-editing' | 'general'
 

@@ -1,0 +1,23 @@
+# ~ /pc-bottleneck-calculator/public/robots.txt
+
+# Global Rules
+User-agent: *
+Allow: /
+Allow: /build/
+Allow: /cpu/
+Allow: /gpu/
+
+# Disallow internal Next.js build chunks and raw data endpoints
+Disallow: /_next/
+Disallow: /api/
+Disallow: /components/
+Disallow: /data/
+Disallow: /lib/
+
+# Prevent engines from scraping temporary share hashes or live calculation queries if applicable
+Disallow: /*?*calc=
+Disallow: /*?*share=
+
+# Host and Sitemap
+Host: https://pc-bottleneck-calculator.com
+Sitemap: https://pc-bottleneck-calculator.com/sitemap.xml

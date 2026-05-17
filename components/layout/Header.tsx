@@ -4,14 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Cpu, Menu, X, ChevronRight } from 'lucide-react'
-
-const links = [
-  { href: '/', label: 'Calculator', desc: 'Check your build' },
-  { href: '/gpu', label: 'GPUs', desc: 'All graphics cards' },
-  { href: '/cpu', label: 'CPUs', desc: 'All processors' },
-  { href: '/games', label: 'Games', desc: 'Guides & analysis' },
-  { href: '/faq', label: 'FAQ', desc: 'Common questions' },
-]
+import { mainNavLinks } from '@/lib/navigation-data'
 
 export default function Header() {
   const [open, setOpen] = useState(false)
@@ -34,12 +27,12 @@ export default function Header() {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 border-b border-[--clr-border] transition-shadow duration-300 ${scrolled ? 'shadow-[0_4px_24px_rgba(0,0,0,0.4)]' : ''
-          }`}
+        className={`sticky top-0 z-50 border-b border-[--clr-border] transition-shadow duration-300 ${
+          scrolled ? 'shadow-[0_4px_24px_rgba(0,0,0,0.4)]' : ''
+        }`}
         style={{ background: 'rgba(10, 11, 15, 0.95)', backdropFilter: 'blur(12px)' }}
       >
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-
           <Link href="/" className="flex items-center gap-2 group flex-shrink-0">
             <div
               className="w-7 h-7 rounded-[--radius-sm] flex items-center justify-center transition-all duration-300 group-hover:shadow-[0_0_16px_rgba(0,212,255,0.5)]"
@@ -55,16 +48,17 @@ export default function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-0.5">
-            {links.map(({ href, label }) => {
+            {mainNavLinks.map(({ href, label }) => {
               const active = pathname === href || (href !== '/' && pathname.startsWith(href))
               return (
                 <Link
                   key={href}
                   href={href}
-                  className={`px-3 py-1.5 rounded-[--radius-sm] text-sm transition-all duration-150 ${active
+                  className={`px-3 py-1.5 rounded-[--radius-sm] text-sm transition-all duration-150 ${
+                    active
                       ? 'bg-[rgba(0,212,255,0.1)] text-[--clr-accent] font-medium'
                       : 'text-[--clr-text-secondary] hover:text-[--clr-text-primary] hover:bg-[--clr-bg-elevated]'
-                    }`}
+                  }`}
                 >
                   {label}
                 </Link>
@@ -109,21 +103,17 @@ export default function Header() {
 
           <div
             className="fixed top-14 left-0 right-0 z-40 md:hidden border-b"
-            style={{
-              background: '#111318',
-              borderColor: '#2a2d38',
-            }}
+            style={{ background: '#111318', borderColor: '#2a2d38' }}
           >
-            {/* Links */}
             <nav className="px-4 py-3 space-y-1">
-              {links.map(({ href, label, desc }) => {
+              {mainNavLinks.map(({ href, label, desc }) => {
                 const active = pathname === href || (href !== '/' && pathname.startsWith(href))
                 return (
                   <Link
                     key={href}
                     href={href}
                     onClick={() => setOpen(false)}
-                    className="flex items-center justify-between px-3 py-3 rounded-[--radius-md] transition-all group"
+                    className="flex items-center justify-between px-3 py-3 rounded-[--radius-md] transition-all"
                     style={{
                       background: active ? 'rgba(0,212,255,0.08)' : 'transparent',
                       border: '1px solid',
@@ -131,18 +121,12 @@ export default function Header() {
                     }}
                   >
                     <div>
-                      <p
-                        className="text-sm font-medium"
-                        style={{ color: active ? '#00d4ff' : '#f0f2f8' }}
-                      >
+                      <p className="text-sm font-medium" style={{ color: active ? '#00d4ff' : '#f0f2f8' }}>
                         {label}
                       </p>
                       <p className="text-xs mt-0.5" style={{ color: '#4e5266' }}>{desc}</p>
                     </div>
-                    <ChevronRight
-                      size={16}
-                      style={{ color: active ? '#00d4ff' : '#4e5266' }}
-                    />
+                    <ChevronRight size={16} style={{ color: active ? '#00d4ff' : '#4e5266' }} />
                   </Link>
                 )
               })}
