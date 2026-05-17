@@ -1,7 +1,3 @@
-// app/og/route.tsx
-// Generates OG images on-demand using Vercel's @vercel/og
-// Usage: /og?title=RTX+4090+Bottleneck&pct=12&severity=low
-
 import { ImageResponse } from 'next/og'
 import type { NextRequest } from 'next/server'
 
@@ -68,7 +64,7 @@ export async function GET(request: NextRequest) {
             <span style={{ color: accentColor, fontSize: 18 }}>⬡</span>
           </div>
           <span style={{ color: '#f0f2f8', fontSize: 20, fontWeight: 700 }}>
-            PC<span style={{ color: accentColor }}>Bottleneck</span>.com
+            PC<span style={{ color: accentColor }}>Bottleneck</span>
           </span>
         </div>
 
@@ -120,7 +116,7 @@ export async function GET(request: NextRequest) {
         {/* Bottom bar */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <p style={{ color: '#4e5266', fontSize: 16, margin: 0 }}>
-            pcbottleneck.com
+            https://pcbottleneck.vercel.app
           </p>
           <p style={{ color: '#4e5266', fontSize: 16, margin: 0 }}>
             Free CPU & GPU Analysis Tool
