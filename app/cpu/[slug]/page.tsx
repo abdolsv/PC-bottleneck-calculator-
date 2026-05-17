@@ -10,8 +10,13 @@ import Footer from '@/components/layout/Footer'
 import { AmazonButton } from '@/components/ui/AmazonButton'
 import { SITE_URL } from '@/lib/constants'
 
+// CRITICAL FIX: Tell Next.js to dynamically generate unrendered pages on-demand
+export const dynamicParams = true
+
 export function generateStaticParams() {
-  return CPUs.map(cpu => ({ slug: cpu.id }))
+  // Rather than mapping thousands of CPUs, return an empty array (or just your top 5-10 favorite slugs).
+  // This reduces your initial build output folder size from 8.4GB down to megabytes.
+  return []
 }
 
 export async function generateMetadata({
@@ -180,13 +185,10 @@ export default async function CpuPage({
 
         {/* ─── HERO ─── */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[--clr-bg-elevated] via-[--clr-bg-card] to-[--clr-bg] border border-[--clr-border] p-6 md:p-10 mb-8">
-          {/* Decorative grid bg */}
           <div className="absolute inset-0 opacity-[0.025] bg-[linear-gradient(rgba(239,68,68,.35)_1px,transparent_1px),linear-gradient(90deg,rgba(239,68,68,.35)_1px,transparent_1px)] [background-size:32px_32px] pointer-events-none" />
-          {/* Glow blob */}
           <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-[--clr-high]/10 blur-3xl pointer-events-none" />
 
           <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-            {/* Text block */}
             <div className="max-w-xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[--clr-border-glow] bg-[--clr-bg] text-xs text-[--clr-text-secondary] mb-4">
                 <span className="w-1.5 h-1.5 rounded-full bg-[--clr-high] animate-pulse" />
@@ -223,13 +225,10 @@ export default async function CpuPage({
               </div>
             </div>
 
-            {/* CPU Schematic */}
             <div className="w-full md:w-64 h-52 relative border border-[--clr-high]/20 bg-[--clr-bg] rounded-2xl flex items-center justify-center p-4 overflow-hidden shadow-2xl flex-shrink-0">
               <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:10px_10px]" />
 
-              {/* CPU Die Package */}
               <div className="w-36 h-36 border border-[--clr-high]/30 rounded-xl flex items-center justify-center relative bg-[--clr-bg-elevated]/60 shadow-inner">
-                {/* Pin grid pads — simulating LGA socket */}
                 {[
                   'absolute -top-1.5 left-1/5', 'absolute -top-1.5 left-2/5',
                   'absolute -top-1.5 right-2/5', 'absolute -top-1.5 right-1/5',
@@ -243,7 +242,6 @@ export default async function CpuPage({
                   />
                 ))}
 
-                {/* Core cluster die */}
                 <div className="w-24 h-24 border-2 border-dashed border-[--clr-high]/40 rounded-lg p-1.5 flex flex-wrap gap-1 items-center justify-center">
                   {Array.from({ length: Math.min(cpu.cores, 16) }).map((_, idx) => (
                     <div
@@ -347,7 +345,6 @@ export default async function CpuPage({
                   href={`/build/${cpu.id}/${gpu.id}`}
                   className="card p-4 sm:p-5 flex items-center justify-between gap-4 hover:border-[--clr-accent]/40 hover:shadow-lg hover:shadow-[--clr-accent]/5 transition-all group"
                 >
-                  {/* Rank + GPU info */}
                   <div className="flex items-center gap-3 min-w-0">
                     <div
                       className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-black flex-shrink-0 ${
@@ -368,9 +365,7 @@ export default async function CpuPage({
                     </div>
                   </div>
 
-                  {/* Bar + Percentage */}
                   <div className="flex items-center gap-4 flex-shrink-0">
-                    {/* Progress bar */}
                     <div className="w-28 hidden md:block">
                       <div className="flex justify-between text-[9px] text-[--clr-text-muted] mb-1">
                         <span>Bottleneck</span>
@@ -388,7 +383,6 @@ export default async function CpuPage({
                       </div>
                     </div>
 
-                    {/* Badge */}
                     <div
                       className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold"
                       style={{
@@ -400,7 +394,6 @@ export default async function CpuPage({
                       <span>{result1440.label}</span>
                     </div>
 
-                    {/* Mobile pct */}
                     <div className="text-right min-w-[52px]">
                       <p
                         className="text-base font-mono font-black sm:hidden"
@@ -547,8 +540,6 @@ export default async function CpuPage({
 
         {/* ─── SEO Article Content ─── */}
         <article className="space-y-10 border-t border-[--clr-border] pt-10 mb-12 prose-sm max-w-none">
-
-          {/* Section 1 — CPU Overview */}
           <section>
             <h2 className="text-2xl font-bold mb-4">
               {cpu.name} Review & Gaming Performance Overview
@@ -576,7 +567,6 @@ export default async function CpuPage({
             </p>
           </section>
 
-          {/* Section 2 — What Is a GPU Bottleneck */}
           <section>
             <h2 className="text-2xl font-bold mb-4">
               What Is a GPU Bottleneck and Why the {cpu.name} Causes One
@@ -607,7 +597,6 @@ export default async function CpuPage({
             </p>
           </section>
 
-          {/* Section 3 — What to Look For in a GPU */}
           <section>
             <h2 className="text-2xl font-bold mb-4">
               Best GPU for {cpu.name}: What Specs Actually Matter
@@ -649,7 +638,6 @@ export default async function CpuPage({
             </ul>
           </section>
 
-          {/* Section 4 — Resolution Guide */}
           <section>
             <h2 className="text-2xl font-bold mb-4">
               {cpu.name} at 1080p vs 1440p vs 4K: How Resolution Affects Bottleneck
@@ -691,7 +679,6 @@ export default async function CpuPage({
             </div>
           </section>
 
-          {/* Section 5 — How to Fix */}
           <section>
             <h2 className="text-2xl font-bold mb-4">
               How to Reduce CPU Bottleneck on the {cpu.name}
@@ -722,7 +709,6 @@ export default async function CpuPage({
             </ol>
           </section>
 
-          {/* Section 6 — Game Genre CPU Sensitivity */}
           <section>
             <h2 className="text-2xl font-bold mb-4">
               {cpu.name} in Popular Game Genres — Bottleneck Sensitivity
@@ -777,7 +763,6 @@ export default async function CpuPage({
             </div>
           </section>
 
-          {/* Section 7 — Platform Context */}
           <section>
             <h2 className="text-2xl font-bold mb-4">
               {cpu.socket} Platform: Motherboard & Memory Recommendations
@@ -819,7 +804,6 @@ export default async function CpuPage({
             </div>
           </section>
 
-          {/* FAQ */}
           <section>
             <h2 className="text-2xl font-bold mb-6">
               Frequently Asked Questions — {cpu.name}
@@ -858,7 +842,6 @@ export default async function CpuPage({
               ))}
             </div>
           </section>
-
         </article>
 
         {/* ─── Related CPU Links ─── */}
