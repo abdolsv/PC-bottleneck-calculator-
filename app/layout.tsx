@@ -12,7 +12,6 @@ const spaceGrotesk = Space_Grotesk({
   display: 'swap',
 })
 
-// Monospace for numbers/specs — feels authentic to hardware specs
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
@@ -45,14 +44,12 @@ export const metadata: Metadata = {
     title: 'PC Bottleneck Calculator — Free CPU & GPU Compatibility Tool',
     description:
       'Find out if your CPU is bottlenecking your GPU instantly. Free, accurate, no signup required.',
-    // 🎨 Routed directly to your dynamic edge generation engine
     images: [{ url: '/og', width: 1200, height: 630, alt: 'PC Bottleneck Calculator' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'PC Bottleneck Calculator',
     description: 'Free CPU & GPU bottleneck analysis tool',
-    // 🎨 Routed directly to your dynamic edge generation engine
     images: ['/og'],
   },
   robots: {
@@ -72,9 +69,21 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    'name': 'PC Bottleneck Calculator',
+    'alternateName': ['PC Bottleneck', 'Bottleneck Calculator'],
+    'url': 'https://pcbottleneck.vercel.app/',
+  }
+
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
       <body className="font-[var(--font-display)]">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <ToastProvider>
           {children}
         </ToastProvider>
