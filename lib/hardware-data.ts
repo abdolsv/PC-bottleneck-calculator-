@@ -158,22 +158,39 @@ export const RAMs: RAM[] = deduplicateById(
 // --- STORAGES DEDUPLICATED LIST ---
 export const Storages: StorageItem[] = deduplicateById(
   storageJson.map((s: any, i: number) => {
-    // FIX: Appending index context safely prevents identical strings like 'samsung-9100-pro-m2-4tb' from wiping each other out
-    const fallbackId = `${s.brand}-${s.model || 'drive'}-${s.capacity}-${i}`.toLowerCase().replace(/[^a-z0-9]/g, '-')
+    const brandClean = String(s.brand || 'Generic').split('http')[0].trim();
+    const modelClean = String(s.model || 'drive').split('http')[0].trim();
+    const capacityClean = String(s.capacity || '1TB').split('http')[0].trim();
+    let rawSlug = s.id 
+      ? String(s.id) 
+      : `${brandClean}-${modelClean}-${capacityClean}-${i}`;
+      
+    let safeSlug = rawSlug
+      .toLowerCase()
+      .replace(/https?:\/\/[^\s]+/g, '') 
+      .replace(/[^a-z0-9]+/g, '-')       
+      .replace(/^-+|-+$/g, '');        
+      
+    if (safeSlug.length > 80) {
+      safeSlug = safeSlug.substring(0, 80).replace(/-+$/, '');
+    }
+
+    const finalId = `${safeSlug}-${i}`;
+
     return {
-      id: s.id || fallbackId,
-      name: s.name || `${s.brand || ''} ${s.model || ''} ${s.capacity || ''}`.trim(),
-      brand: s.brand || 'Generic',
+      id: finalId,
+      name: s.name || `${brandClean} ${modelClean} ${capacityClean}`.trim(),
+      brand: brandClean || 'Generic',
       type: s.type || 'M.2 NVMe',
-      capacity: s.capacity || '1TB',
+      capacity: capacityClean || '1TB',
       price: s.price || 0,
       score: s.score || 0,
       samples: s.samples || 0,
-      model: s.model || 'Unknown',
+      model: modelClean || 'Unknown',
       rank: s.rank || 999,
-    }
+    };
   })
-)
+);
 
 export type UseCase = 'gaming-1080p' | 'gaming-1440p' | 'gaming-4k' | 'streaming' | 'video-editing' | 'general'
 
