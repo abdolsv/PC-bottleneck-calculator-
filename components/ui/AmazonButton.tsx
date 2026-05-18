@@ -7,7 +7,7 @@ interface Props {
 }
 
 export function AmazonButton({ query, className = '', label = 'Check Price on Amazon' }: Props) {
-  const tag = process.env.NEXT_PUBLIC_AMAZON_TAG
+  const tag = process.env.NEXT_PUBLIC_AMAZON_TAG || generator032-20
 
   if (!tag) {
     if (process.env.NODE_ENV === 'development') {

@@ -1,5 +1,6 @@
 'use client'
-import { useState, useCallback, useEffect } from 'react'
+
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import {
   Zap, ChevronRight, Settings2, RotateCcw, BookmarkPlus, Bookmark,
@@ -11,8 +12,6 @@ import { UseCaseSelector } from './UseCaseSelector'
 import { ResultDisplay } from './ResultDisplay'
 import { Button } from '@/components/ui/Button'
 import { saveBuild, getSavedBuilds, type SavedBuild } from '@/lib/build-storage'
-
-// ─── Constants ───────────────────────────────────────────────────────────────
 
 const RAM_OPTIONS = [8, 16, 32, 64] as const
 
@@ -30,13 +29,11 @@ const RAM_SPEED_LABELS: Record<RamSpeed, string> = {
   'ddr5-6000': 'DDR5-6000',
 }
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 interface AdvancedOptions {
-  cpuOverclock:    number      // % boost applied to cpu.benchmarkScore
-  gpuOverclock:    number      // % boost applied to gpu.benchmarkScore
-  ramSpeed:        RamSpeed    // passed through to calculateBottleneck
-  thermalThrottle: boolean     // applies ~8 % CPU penalty
+  cpuOverclock:    number
+  gpuOverclock:    number
+  ramSpeed:        RamSpeed
+  thermalThrottle: boolean
 }
 
 const DEFAULT_ADVANCED: AdvancedOptions = {
@@ -46,19 +43,15 @@ const DEFAULT_ADVANCED: AdvancedOptions = {
   thermalThrottle: false,
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export default function BottleneckCalculator() {
   const searchParams = useSearchParams()
   const router       = useRouter()
 
-  // Core selectors
   const [selectedCpu, setSelectedCpu] = useState<CPU | null>(null)
   const [selectedGpu, setSelectedGpu] = useState<GPU | null>(null)
   const [useCase,     setUseCase]     = useState<UseCase>('gaming-1440p')
   const [ram,         setRam]         = useState<number>(16)
 
-  // Derived / UI state
   const [result,       setResult]       = useState<BottleneckResult | null>(null)
   const [calculating,  setCalculating]  = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
@@ -66,7 +59,12 @@ export default function BottleneckCalculator() {
   const [justSaved,    setJustSaved]    = useState(false)
   const [advanced,     setAdvanced]     = useState<AdvancedOptions>(DEFAULT_ADVANCED)
 
-  // ── Hydrate from URL params on mount ──────────────────────────────────────
+  const stateRef = useRef({ selectedCpu, selectedGpu, useCase, ram, advanced })
+
+  useEffect(() => {
+    stateRef.current = { selectedCpu, selectedGpu, useCase, ram, advanced }
+  }, [selectedCpu, selectedGpu, useCase, ram, advanced])
+
   useEffect(() => {
     const cpuParam  = searchParams.get('cpu')
     const gpuParam  = searchParams.get('gpu')
@@ -84,58 +82,56 @@ export default function BottleneckCalculator() {
     }
   }, [searchParams])
 
-  // ── Load saved builds on mount ────────────────────────────────────────────
-  useEffect(() => { setSavedBuilds(getSavedBuilds()) }, [])
+  useEffect(() => {
+    setSavedBuilds(getSavedBuilds())
+  }, [])
 
-  // ── Core calculation ──────────────────────────────────────────────────────
   const handleCalculate = useCallback(() => {
-    if (!selectedCpu || !selectedGpu) return
+    const currentInput = stateRef.current
+    if (!currentInput.selectedCpu || !currentInput.selectedGpu) return
+    
     setCalculating(true)
 
-    // Small timeout gives the browser a chance to update the button/spinner UI
     setTimeout(() => {
-      // Apply overclocks + thermal throttle to scores before passing to engine
+      const freshInput = stateRef.current
+      if (!freshInput.selectedCpu || !freshInput.selectedGpu) return
+
       const modifiedCpu: CPU = {
-        ...selectedCpu,
+        ...freshInput.selectedCpu,
         benchmarkScore: Math.min(100,
-          selectedCpu.benchmarkScore
-          * (1 + advanced.cpuOverclock / 100)
-          * (advanced.thermalThrottle ? 0.92 : 1)
+          freshInput.selectedCpu.benchmarkScore
+          * (1 + freshInput.advanced.cpuOverclock / 100)
+          * (freshInput.advanced.thermalThrottle ? 0.92 : 1)
         ),
       }
       const modifiedGpu: GPU = {
-        ...selectedGpu,
+        ...freshInput.selectedGpu,
         benchmarkScore: Math.min(100,
-          selectedGpu.benchmarkScore * (1 + advanced.gpuOverclock / 100)
+          freshInput.selectedGpu.benchmarkScore * (1 + freshInput.advanced.gpuOverclock / 100)
         ),
       }
 
-      // ── SINGLE source of truth for ramSpeed: pass it into the engine ──
-      // The engine applies RAM_SPEED_BASE_BOOST internally, weighted by use case.
-      // No post-hoc percentage adjustment is applied here.
       const res = calculateBottleneck(
         modifiedCpu,
         modifiedGpu,
-        useCase,
-        ram,
-        advanced.ramSpeed,   // <── unified ramSpeed handling
+        freshInput.useCase,
+        freshInput.ram,
+        freshInput.advanced.ramSpeed,
       )
 
       setResult(res)
       setCalculating(false)
 
-      // Persist selection to URL (enables shareable links)
       const params = new URLSearchParams({
-        cpu: selectedCpu.id,
-        gpu: selectedGpu.id,
-        use: useCase,
-        ram: String(ram),
+        cpu: freshInput.selectedCpu.id,
+        gpu: freshInput.selectedGpu.id,
+        use: freshInput.useCase,
+        ram: String(freshInput.ram),
       })
       router.replace(`?${params.toString()}`, { scroll: false })
     }, 400)
-  }, [selectedCpu, selectedGpu, useCase, ram, advanced, router])
+  }, [router])
 
-  // ── Reset ─────────────────────────────────────────────────────────────────
   const handleReset = () => {
     setSelectedCpu(null)
     setSelectedGpu(null)
@@ -146,7 +142,6 @@ export default function BottleneckCalculator() {
     router.replace('/', { scroll: false })
   }
 
-  // ── Save build ────────────────────────────────────────────────────────────
   const handleSave = () => {
     if (!selectedCpu || !selectedGpu || !result) return
     saveBuild({
@@ -167,19 +162,13 @@ export default function BottleneckCalculator() {
     setTimeout(() => setJustSaved(false), 2000)
   }
 
-  // ── Derived flags ─────────────────────────────────────────────────────────
   const canCalculate  = !!selectedCpu && !!selectedGpu
   const hasResult     = !!result && !calculating
   const hasActiveOC   = advanced.cpuOverclock > 0 || advanced.gpuOverclock > 0
 
-  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-4">
-
-      {/* ─── Input card ─────────────────────────────────────────────────── */}
       <div className="card p-4 sm:p-6">
-
-        {/* Header row */}
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-sm font-semibold uppercase tracking-widest"
               style={{ color: 'var(--clr-text-secondary)' }}>
@@ -200,7 +189,6 @@ export default function BottleneckCalculator() {
           )}
         </div>
 
-        {/* CPU + GPU selectors */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
           <ComponentSelector<CPU>
             label="CPU (Processor)"
@@ -222,10 +210,8 @@ export default function BottleneckCalculator() {
           />
         </div>
 
-        {/* Use-case selector — drives cpuWeight/gpuWeight in the engine */}
         <UseCaseSelector selected={useCase} onChange={setUseCase} />
 
-        {/* RAM size */}
         <div className="mt-4">
           <label className="block text-xs font-medium uppercase tracking-widest mb-2"
                  style={{ color: 'var(--clr-text-secondary)' }}>
@@ -262,7 +248,6 @@ export default function BottleneckCalculator() {
           )}
         </div>
 
-        {/* Advanced options */}
         <div className="mt-4">
           <button
             type="button"
@@ -289,7 +274,6 @@ export default function BottleneckCalculator() {
                 Fine-tune with real-world modifiers. These affect benchmark scores and the bottleneck calculation.
               </p>
 
-              {/* CPU overclock */}
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <label className="text-xs" style={{ color: 'var(--clr-text-secondary)' }}>
@@ -311,7 +295,6 @@ export default function BottleneckCalculator() {
                 </div>
               </div>
 
-              {/* GPU overclock */}
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <label className="text-xs" style={{ color: 'var(--clr-text-secondary)' }}>
@@ -333,7 +316,6 @@ export default function BottleneckCalculator() {
                 </div>
               </div>
 
-              {/* RAM speed — unified: value is forwarded to the engine */}
               <div>
                 <label className="text-xs block mb-1.5" style={{ color: 'var(--clr-text-secondary)' }}>
                   RAM Speed
@@ -350,7 +332,7 @@ export default function BottleneckCalculator() {
                         style={{
                           background:  active ? 'rgba(0,212,255,0.08)' : 'var(--clr-bg)',
                           borderColor: active ? 'rgba(0,212,255,0.4)'  : 'var(--clr-border)',
-                          color:       active ? '#00d4ff'               : 'var(--clr-text-secondary)',
+                          color:       active ? '#00d4ff'                : 'var(--clr-text-secondary)',
                         }}
                       >
                         {RAM_SPEED_LABELS[speed]}
@@ -363,7 +345,6 @@ export default function BottleneckCalculator() {
                 </p>
               </div>
 
-              {/* Thermal throttle toggle */}
               <label className="flex items-center justify-between gap-4 cursor-pointer">
                 <div className="min-w-0">
                   <p className="text-xs" style={{ color: 'var(--clr-text-secondary)' }}>
@@ -403,7 +384,6 @@ export default function BottleneckCalculator() {
           )}
         </div>
 
-        {/* CTA row */}
         <div className="mt-5 flex flex-col xs:flex-row gap-2">
           <Button
             size="lg"
@@ -441,12 +421,10 @@ export default function BottleneckCalculator() {
         )}
       </div>
 
-      {/* ─── Result ─────────────────────────────────────────────────────── */}
       {result && selectedCpu && selectedGpu && !calculating && (
         <ResultDisplay result={result} cpu={selectedCpu} gpu={selectedGpu} />
       )}
 
-      {/* ─── Saved builds ───────────────────────────────────────────────── */}
       {savedBuilds.length > 0 && (
         <details className="card p-4">
           <summary className="text-xs font-semibold uppercase tracking-widest cursor-pointer select-none list-none flex items-center gap-2"
