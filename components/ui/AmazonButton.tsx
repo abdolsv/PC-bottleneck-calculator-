@@ -7,7 +7,7 @@ interface Props {
 }
 
 export function AmazonButton({ query, className = '', label = 'Check Price on Amazon' }: Props) {
-  const tag = process.env.NEXT_PUBLIC_AMAZON_TAG || generator032-20
+  const tag = process.env.NEXT_PUBLIC_AMAZON_TAG || 'generator032-20'
 
   if (!tag) {
     if (process.env.NODE_ENV === 'development') {
@@ -16,7 +16,7 @@ export function AmazonButton({ query, className = '', label = 'Check Price on Am
         'Add it to your .env.local to enable affiliate links.'
       )
     }
-    
+
     const url = `https://www.amazon.com/s?k=${encodeURIComponent(query)}`
     return (
       <a
