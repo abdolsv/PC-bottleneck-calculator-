@@ -2,6 +2,8 @@
 import { NextResponse } from 'next/server'
 import { CPUs, GPUs } from '@/lib/hardware-data'
 import { SITE_URL } from '@/lib/constants'
+import ramJson from '@/data/ram.json'
+import storageJson from '@/data/storage.json'
 
 export const dynamic = 'force-dynamic'
 const CHUNK_SIZE = 5000
@@ -13,12 +15,10 @@ export async function GET(
   const { id: idArray } = await params
   const now = new Date().toISOString()
 
-  // If someone just hits /sitemap or /sitemap/ without an ID
   if (!idArray || idArray.length === 0) {
     return new NextResponse('Specify a chunk index (e.g., /sitemap/0.xml)', { status: 404 })
   }
 
-  // Extract the raw string segment (e.g., "0.xml" or "0") and strip trailing extension
   const rawId = idArray[0]
   const sitemapId = parseInt(rawId.replace('.xml', ''), 10)
 
@@ -28,7 +28,7 @@ export async function GET(
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`
 
-  // ID 0: Handles Base Statics + Core Hardware Catalogs
+  // ID 0: Base statics + all hardware catalog pages
   if (sitemapId === 0) {
     const staticPages = [
       { url: SITE_URL, changefreq: 'weekly', priority: '1.0' },
@@ -40,10 +40,10 @@ export async function GET(
     ]
 
     const directoryPages = [
-      { url: `${SITE_URL}/cpu`, changefreq: 'weekly', priority: '0.6' },
-      { url: `${SITE_URL}/gpu`, changefreq: 'weekly', priority: '0.6' },
-      { url: `${SITE_URL}/ram`, changefreq: 'monthly', priority: '0.5' },
-      { url: `${SITE_URL}/storage`, changefreq: 'monthly', priority: '0.5' },
+      { url: `${SITE_URL}/cpu`, changefreq: 'weekly', priority: '0.7' },
+      { url: `${SITE_URL}/gpu`, changefreq: 'weekly', priority: '0.7' },
+      { url: `${SITE_URL}/ram`, changefreq: 'monthly', priority: '0.6' },
+      { url: `${SITE_URL}/storage`, changefreq: 'monthly', priority: '0.6' },
     ]
 
     const basePages = [...staticPages, ...directoryPages]
@@ -60,8 +60,18 @@ export async function GET(
       xml += `\n  <url><loc>${SITE_URL}/cpu/${cpu.id}</loc><lastmod>${now}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>`
     })
 
+    // RAM detail pages
+    ;(ramJson as any[]).forEach((ram: any) => {
+      xml += `\n  <url><loc>${SITE_URL}/ram/${ram.id}</loc><lastmod>${now}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>`
+    })
+
+    // Storage detail pages
+    ;(storageJson as any[]).forEach((storage: any) => {
+      xml += `\n  <url><loc>${SITE_URL}/storage/${storage.id}</loc><lastmod>${now}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>`
+    })
+
   } else {
-    // ID 1+: Handles Heavy Build Pairings Chunking
+    // ID 1+: Build pairing chunks
     const limitedCPUs = CPUs.slice(0, 150)
     const limitedGPUs = GPUs.slice(0, 150)
     const allBuilds: { cpuId: string; gpuId: string }[] = []

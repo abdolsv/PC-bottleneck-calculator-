@@ -59,26 +59,48 @@ export default function BottleneckCalculator() {
   const [justSaved,    setJustSaved]    = useState(false)
   const [advanced,     setAdvanced]     = useState<AdvancedOptions>(DEFAULT_ADVANCED)
 
-  const stateRef = useRef({ selectedCpu, selectedGpu, useCase, ram, advanced })
+  // Track whether we already auto-calculated from URL params
+  const autoCalcRef = useRef(false)
 
+  // Load URL params and auto-calculate if both CPU + GPU are present
   useEffect(() => {
-    stateRef.current = { selectedCpu, selectedGpu, useCase, ram, advanced }
-  }, [selectedCpu, selectedGpu, useCase, ram, advanced])
+    const cpuParam = searchParams.get('cpu')
+    const gpuParam = searchParams.get('gpu')
+    const useParam = searchParams.get('use') as UseCase | null
+    const ramParam = searchParams.get('ram')
 
-  useEffect(() => {
-    const cpuParam  = searchParams.get('cpu')
-    const gpuParam  = searchParams.get('gpu')
-    const useParam  = searchParams.get('use') as UseCase | null
-    const ramParam  = searchParams.get('ram')
+    const validUseCases = new Set([
+      'gaming-1080p', 'gaming-1440p', 'gaming-4k', 'streaming', 'video-editing', 'general',
+    ])
 
-    if (cpuParam) setSelectedCpu(CPUs.find(c => c.id === cpuParam) ?? null)
-    if (gpuParam) setSelectedGpu(GPUs.find(g => g.id === gpuParam) ?? null)
-    if (useParam && useParam in { 'gaming-1080p':1,'gaming-1440p':1,'gaming-4k':1,'streaming':1,'video-editing':1,'general':1 }) {
-      setUseCase(useParam)
-    }
-    if (ramParam) {
-      const parsed = Number(ramParam)
-      if (RAM_OPTIONS.includes(parsed as typeof RAM_OPTIONS[number])) setRam(parsed)
+    const resolvedCpu  = cpuParam ? (CPUs.find(c => c.id === cpuParam) ?? null) : null
+    const resolvedGpu  = gpuParam ? (GPUs.find(g => g.id === gpuParam) ?? null) : null
+    const resolvedUse  = useParam && validUseCases.has(useParam) ? useParam : 'gaming-1440p'
+    const resolvedRam  = ramParam && RAM_OPTIONS.includes(Number(ramParam) as any)
+      ? Number(ramParam)
+      : 16
+
+    if (resolvedCpu) setSelectedCpu(resolvedCpu)
+    if (resolvedGpu) setSelectedGpu(resolvedGpu)
+    if (useParam)    setUseCase(resolvedUse)
+    if (ramParam)    setRam(resolvedRam)
+
+    // Auto-calculate when both components are present in URL — this is the fix
+    // for "calculator not showing details on deep links"
+    if (resolvedCpu && resolvedGpu && !autoCalcRef.current) {
+      autoCalcRef.current = true
+
+      const modifiedCpu: CPU = {
+        ...resolvedCpu,
+        benchmarkScore: Math.min(100, resolvedCpu.benchmarkScore),
+      }
+      const modifiedGpu: GPU = {
+        ...resolvedGpu,
+        benchmarkScore: Math.min(100, resolvedGpu.benchmarkScore),
+      }
+
+      const res = calculateBottleneck(modifiedCpu, modifiedGpu, resolvedUse, resolvedRam)
+      setResult(res)
     }
   }, [searchParams])
 
@@ -87,50 +109,52 @@ export default function BottleneckCalculator() {
   }, [])
 
   const handleCalculate = useCallback(() => {
-    const currentInput = stateRef.current
-    if (!currentInput.selectedCpu || !currentInput.selectedGpu) return
-    
+    if (!selectedCpu || !selectedGpu) return
     setCalculating(true)
 
-    setTimeout(() => {
-      const freshInput = stateRef.current
-      if (!freshInput.selectedCpu || !freshInput.selectedGpu) return
+    // Snapshot values immediately to avoid stale closure
+    const snapCpu     = selectedCpu
+    const snapGpu     = selectedGpu
+    const snapUseCase = useCase
+    const snapRam     = ram
+    const snapAdv     = advanced
 
+    setTimeout(() => {
       const modifiedCpu: CPU = {
-        ...freshInput.selectedCpu,
+        ...snapCpu,
         benchmarkScore: Math.min(100,
-          freshInput.selectedCpu.benchmarkScore
-          * (1 + freshInput.advanced.cpuOverclock / 100)
-          * (freshInput.advanced.thermalThrottle ? 0.92 : 1)
+          snapCpu.benchmarkScore
+          * (1 + snapAdv.cpuOverclock / 100)
+          * (snapAdv.thermalThrottle ? 0.92 : 1)
         ),
       }
       const modifiedGpu: GPU = {
-        ...freshInput.selectedGpu,
+        ...snapGpu,
         benchmarkScore: Math.min(100,
-          freshInput.selectedGpu.benchmarkScore * (1 + freshInput.advanced.gpuOverclock / 100)
+          snapGpu.benchmarkScore * (1 + snapAdv.gpuOverclock / 100)
         ),
       }
 
       const res = calculateBottleneck(
         modifiedCpu,
         modifiedGpu,
-        freshInput.useCase,
-        freshInput.ram,
-        freshInput.advanced.ramSpeed,
+        snapUseCase,
+        snapRam,
+        snapAdv.ramSpeed,
       )
 
       setResult(res)
       setCalculating(false)
 
       const params = new URLSearchParams({
-        cpu: freshInput.selectedCpu.id,
-        gpu: freshInput.selectedGpu.id,
-        use: freshInput.useCase,
-        ram: String(freshInput.ram),
+        cpu: snapCpu.id,
+        gpu: snapGpu.id,
+        use: snapUseCase,
+        ram: String(snapRam),
       })
       router.replace(`?${params.toString()}`, { scroll: false })
-    }, 400)
-  }, [router])
+    }, 350)
+  }, [selectedCpu, selectedGpu, useCase, ram, advanced, router])
 
   const handleReset = () => {
     setSelectedCpu(null)
@@ -139,6 +163,7 @@ export default function BottleneckCalculator() {
     setRam(16)
     setResult(null)
     setAdvanced(DEFAULT_ADVANCED)
+    autoCalcRef.current = false
     router.replace('/', { scroll: false })
   }
 
@@ -194,7 +219,7 @@ export default function BottleneckCalculator() {
             label="CPU (Processor)"
             items={CPUs}
             selected={selectedCpu}
-            onSelect={setSelectedCpu}
+            onSelect={cpu => { setSelectedCpu(cpu); setResult(null); autoCalcRef.current = false }}
             renderLabel={c => c.name}
             renderMeta={c => `${c.cores}C · ${c.boostClock}GHz`}
             placeholder="Search CPUs (Intel, AMD)..."
@@ -203,14 +228,14 @@ export default function BottleneckCalculator() {
             label="GPU (Graphics Card)"
             items={GPUs}
             selected={selectedGpu}
-            onSelect={setSelectedGpu}
+            onSelect={gpu => { setSelectedGpu(gpu); setResult(null); autoCalcRef.current = false }}
             renderLabel={g => g.name}
             renderMeta={g => `${g.vram}GB VRAM`}
             placeholder="Search GPUs (NVIDIA, AMD)..."
           />
         </div>
 
-        <UseCaseSelector selected={useCase} onChange={setUseCase} />
+        <UseCaseSelector selected={useCase} onChange={uc => { setUseCase(uc); setResult(null) }} />
 
         <div className="mt-4">
           <label className="block text-xs font-medium uppercase tracking-widest mb-2"
@@ -224,7 +249,7 @@ export default function BottleneckCalculator() {
                 <button
                   key={gb}
                   type="button"
-                  onClick={() => setRam(gb)}
+                  onClick={() => { setRam(gb); setResult(null) }}
                   className="py-2.5 rounded-md text-xs font-semibold border transition-all"
                   style={{
                     background:  active ? 'rgba(0,212,255,0.1)' : 'var(--clr-bg-elevated)',
@@ -248,6 +273,7 @@ export default function BottleneckCalculator() {
           )}
         </div>
 
+        {/* Advanced Options */}
         <div className="mt-4">
           <button
             type="button"
@@ -274,6 +300,7 @@ export default function BottleneckCalculator() {
                 Fine-tune with real-world modifiers. These affect benchmark scores and the bottleneck calculation.
               </p>
 
+              {/* CPU Overclock */}
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <label className="text-xs" style={{ color: 'var(--clr-text-secondary)' }}>
@@ -295,6 +322,7 @@ export default function BottleneckCalculator() {
                 </div>
               </div>
 
+              {/* GPU Overclock */}
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <label className="text-xs" style={{ color: 'var(--clr-text-secondary)' }}>
@@ -316,6 +344,7 @@ export default function BottleneckCalculator() {
                 </div>
               </div>
 
+              {/* RAM Speed */}
               <div>
                 <label className="text-xs block mb-1.5" style={{ color: 'var(--clr-text-secondary)' }}>
                   RAM Speed
@@ -345,6 +374,7 @@ export default function BottleneckCalculator() {
                 </p>
               </div>
 
+              {/* Thermal Throttle */}
               <label className="flex items-center justify-between gap-4 cursor-pointer">
                 <div className="min-w-0">
                   <p className="text-xs" style={{ color: 'var(--clr-text-secondary)' }}>
@@ -384,6 +414,7 @@ export default function BottleneckCalculator() {
           )}
         </div>
 
+        {/* Action buttons */}
         <div className="mt-5 flex flex-col xs:flex-row gap-2">
           <Button
             size="lg"
@@ -421,10 +452,12 @@ export default function BottleneckCalculator() {
         )}
       </div>
 
+      {/* Results */}
       {result && selectedCpu && selectedGpu && !calculating && (
         <ResultDisplay result={result} cpu={selectedCpu} gpu={selectedGpu} />
       )}
 
+      {/* Saved builds */}
       {savedBuilds.length > 0 && (
         <details className="card p-4">
           <summary className="text-xs font-semibold uppercase tracking-widest cursor-pointer select-none list-none flex items-center gap-2"
@@ -457,6 +490,7 @@ export default function BottleneckCalculator() {
                     setUseCase(build.useCase as UseCase)
                     setRam(build.ram)
                     setResult(null)
+                    autoCalcRef.current = false
                   }}
                   className="flex-shrink-0 px-2 py-1 rounded text-xs border transition-colors"
                   style={{

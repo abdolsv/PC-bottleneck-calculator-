@@ -6,32 +6,34 @@ const topGpus = [...GPUs].sort((a, b) => b.benchmarkScore - a.benchmarkScore).sl
 const topCpus = [...CPUs].sort((a, b) => b.benchmarkScore - a.benchmarkScore).slice(0, 2)
 
 export const mainNavLinks = [
-  { href: '/', label: 'Calculator', desc: 'Check your custom system build build' },
-  { href: '/gpu', label: 'GPUs', desc: 'All dynamic graphics cards inventory' },
-  { href: '/cpu', label: 'CPUs', desc: 'All processing units taxonomy' },
-  { href: '/games', label: 'Games', desc: 'Bottleneck metrics gaming logs' },
+  { href: '/', label: 'Calculator', desc: 'Check your custom system build' },
+  { href: '/gpu', label: 'GPUs', desc: 'All graphics cards indexed' },
+  { href: '/cpu', label: 'CPUs', desc: 'All processors indexed' },
+  { href: '/games', label: 'Games', desc: 'Per-game FPS benchmarks' },
   { href: '/faq', label: 'FAQ', desc: 'Common community questions' },
 ]
 
 export const footerLinks = {
   Tools: [
     { label: 'Bottleneck Calculator', href: '/' },
-    { label: 'GPU Comparison', href: '/gpu' },
-    { label: 'CPU Comparison', href: '/cpu' },
+    { label: 'GPU Index', href: '/gpu' },
+    { label: 'CPU Index', href: '/cpu' },
+    { label: 'RAM Rankings', href: '/ram' },
+    { label: 'SSD Rankings', href: '/storage' },
   ],
   Learn: [
+    { label: 'Game FPS Database', href: '/games' },
     { label: 'FAQ', href: '/faq' },
-    { label: 'Games', href: '/games' },
-    { label: 'About', href: '/about' },
+    { label: 'About Us', href: '/about' },
   ],
   Popular: [
     ...topGpus.map(gpu => ({
       label: `${gpu.name.replace(/nvidia\s|amd\s|intel\s/i, '')} Analysis`,
-      href: `/gpu/${gpu.id}`
+      href: `/gpu/${gpu.id}`,
     })),
     ...topCpus.map(cpu => ({
       label: `${cpu.name.replace(/intel\s|amd\s/i, '')} Guide`,
-      href: `/cpu/${cpu.id}`
-    }))
-  ]
+      href: `/cpu/${cpu.id}`,
+    })),
+  ],
 }
