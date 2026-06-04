@@ -10,12 +10,15 @@ import Footer from '@/components/layout/Footer'
 import { AmazonButton } from '@/components/ui/AmazonButton'
 import { SITE_URL } from '@/lib/constants'
 
-// CRITICAL FIX: Tell Next.js to dynamically generate unrendered pages on-demand
+// SOLUTION FIX 1: Cache the dynamically generated pages on the CDN for 24 hours (86400 seconds)
+export const revalidate = 86400
+
+// SOLUTION FIX 2: Explicitly tell Next.js to dynamically generate unrendered pages on-demand via ISR
 export const dynamicParams = true
 
 export function generateStaticParams() {
-  // Rather than mapping thousands of CPUs, return an empty array (or just your top 5-10 favorite slugs).
-  // This reduces your initial build output folder size from 8.4GB down to megabytes.
+  // Return an empty array so Next.js doesn't attempt to build thousands of pages during the build phase.
+  // Pages will be safely compiled one-by-one on demand when a user or crawler visits them.
   return []
 }
 

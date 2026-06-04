@@ -4,9 +4,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { CPUs, GPUs } from '@/lib/hardware-data'
 import { calculateBottleneck } from '@/lib/bottleneck-engine'
 
+// Retained so Next.js actively extracts and handles query parameters at runtime
 export const dynamic = 'force-dynamic'
 
-// Rate limiting — use Upstash Redis in production
+// Note: In-memory Maps clear on cold starts. For bulletproof absolute rate limits 
+// across distributed instances, migrate requestCounts to an Upstash Redis adapter.
 const requestCounts = new Map<string, { count: number; resetAt: number }>()
 
 function checkRateLimit(ip: string, limit = 30): boolean {
@@ -48,8 +50,9 @@ export async function GET(req: NextRequest) {
     { cpu: cpu.name, gpu: gpu.name, useCase, ram, result },
     {
       headers: {
+        // Shared CDN edge layer caches matching queries for up to 1 hour, minimizing CPU impact
         'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
-        'Access-Control-Allow-Origin': '*', // lock this down if you sell API access
+        'Access-Control-Allow-Origin': '*', 
       },
     }
   )

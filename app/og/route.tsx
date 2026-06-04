@@ -1,7 +1,11 @@
+// app/og/route.tsx
 import { ImageResponse } from 'next/og'
 import type { NextRequest } from 'next/server'
 
 export const runtime = 'edge'
+
+// FIX: Cache dynamic image output bundles at the CDN edge for 24 hours
+export const revalidate = 86400
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)

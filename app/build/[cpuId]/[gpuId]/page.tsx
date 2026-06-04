@@ -1,5 +1,5 @@
 // app/build/[cpuId]/[gpuId]/page.tsx
-// On-demand generated pages targeting "[CPU] [GPU] bottleneck" searches
+// On-demand generated pages targeting "[CPU] [GPU] bottleneck" searches with ISR caching
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -11,11 +11,29 @@ import Footer from '@/components/layout/Footer'
 import { AmazonButton } from '@/components/ui/AmazonButton'
 import { SITE_URL } from '@/lib/constants'
 
-// Forces on-demand server rendering to prevent build worker stack overflow crashes
-export const dynamic = 'force-dynamic'
+// --- PERFORMANCE & BANDWIDTH OPTIMIZATIONS ---
+// 1. Cache pages for 24 hours (86400 seconds) after the first request
+export const revalidate = 86400 
 
-interface Props { 
-  params: Promise<{ cpuId: string; gpuId: string }> 
+// 2. Allow on-demand background generation for the remaining 169k+ combinations
+export const dynamicParams = true 
+
+// 3. Pre-build only the most popular 400 combinations at build time to prevent stack overflows
+export function generateStaticParams() {
+  const topCpus = CPUs.slice(0, 20)
+  const topGpus = GPUs.slice(0, 20)
+  
+  return topCpus.flatMap(cpu =>
+    topGpus.map(gpu => ({ 
+      cpuId: cpu.id, 
+      gpuId: gpu.id 
+    }))
+  )
+}
+// ----------------------------------------------
+
+interface Props {
+  params: Promise<{ cpuId: string; gpuId: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -54,7 +72,7 @@ const colorMap: Record<string, string> = {
   '--clr-low':      '#22d3a0',
   '--clr-medium':   '#f5a524',
   '--clr-high':     '#ef4444',
-  '--clr-critical':'#ff2056',
+  '--clr-critical': '#ff2056',
 }
 
 export default async function BuildPage({ params }: Props) {

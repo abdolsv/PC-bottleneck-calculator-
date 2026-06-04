@@ -5,7 +5,9 @@ import { SITE_URL } from '@/lib/constants'
 import ramJson from '@/data/ram.json'
 import storageJson from '@/data/storage.json'
 
-export const dynamic = 'force-dynamic'
+// FIX: Cache and revalidate hourly instead of forcing calculation on every single request
+export const revalidate = 3600 
+
 const CHUNK_SIZE = 5000
 
 export async function GET(
