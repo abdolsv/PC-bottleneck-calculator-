@@ -1,4 +1,3 @@
-// app/layout.tsx
 import type { Metadata } from 'next'
 import { Space_Grotesk, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
@@ -20,11 +19,10 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 })
 
-// Programmatic year calculation to keep SEO dynamic and evergreen
 const currentYear = new Date().getFullYear()
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://pcbottleneck.vercel.app/'),
+  metadataBase: new URL('https://pcbottleneckcal.netlify.app/'),
   title: {
     default: `PC Bottleneck Calculator — Free CPU & GPU Compatibility Tool (${currentYear})`,
     template: `%s | PC Bottleneck Calculator`,
@@ -46,7 +44,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://pcbottleneck.vercel.app/',
+    url: 'https://pcbottleneckcal.netlify.app/',
     siteName: 'PC Bottleneck Calculator',
     title: `PC Bottleneck Calculator — Free CPU & GPU Compatibility Tool (${currentYear})`,
     description:
@@ -71,7 +69,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: '1NWH8PUXZMUGf_QdZ72WhlBOM2Ly2AF61cJ9VQcvSfg',
+    google: 'lu-7Yd3yuM8Y-VIe3qzTY-l2Y09UQVRdzB7E0wikqPQ',
   },
 }
 
@@ -81,7 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     '@type': 'WebSite',
     'name': 'PC Bottleneck Calculator',
     'alternateName': ['PC Bottleneck', 'Bottleneck Calculator'],
-    'url': 'https://pcbottleneck.vercel.app/',
+    'url': 'https://pcbottleneckcal.netlify.app/',
   }
 
   return (
