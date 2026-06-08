@@ -1,10 +1,8 @@
-// app/og/route.tsx
 import { ImageResponse } from 'next/og'
 import type { NextRequest } from 'next/server'
 
 export const runtime = 'edge'
 
-// FIX: Cache dynamic image output bundles at the CDN edge for 24 hours
 export const revalidate = 86400
 
 export async function GET(request: NextRequest) {
@@ -120,7 +118,7 @@ export async function GET(request: NextRequest) {
         {/* Bottom bar */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <p style={{ color: '#4e5266', fontSize: 16, margin: 0 }}>
-            https://pcbottleneck.vercel.app
+            https://pcbottleneckcal.netlify.app
           </p>
           <p style={{ color: '#4e5266', fontSize: 16, margin: 0 }}>
             Free CPU & GPU Analysis Tool
