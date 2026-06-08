@@ -1,0 +1,148 @@
+# PC Bottleneck Calculator
+> Free CPU & GPU bottleneck analysis tool for PC builders, gamers, and hardware enthusiasts.
+
+## What This Platform Does
+
+PC Bottleneck Calculator is a free, browser-based tool that calculates the bottleneck percentage between any CPU and GPU pairing. It answers the question every PC builder faces: "Will this CPU limit my GPU (or vice versa)?" — with real data, not guesswork.
+
+The tool accounts for target resolution (1080p / 1440p / 4K), use case (gaming, streaming, video editing), system RAM, RAM speed, overclocking, and thermal throttling. It returns a bottleneck percentage, utilization estimates for both components, an efficiency score, and a specific upgrade recommendation.
+
+## Core Tools & Features
+
+- **Bottleneck Calculator** (`/`): Select any CPU + GPU pair, set your resolution/use-case, RAM size and speed, and get an instant bottleneck percentage with CPU/GPU utilization estimates and upgrade advice.
+- **CPU Index** (`/cpu`): Browse all indexed Intel and AMD processors, grouped by series (Core i9, Ryzen 7, etc.), with benchmark scores and links to per-CPU analysis pages.
+- **GPU Index** (`/gpu`): Browse all indexed NVIDIA, AMD, and Intel graphics cards, with VRAM, TDP, target resolution, and benchmark scores.
+- **CPU Detail Pages** (`/cpu/[id]`): Full bottleneck analysis for a specific CPU against every GPU in the database. Includes best GPU matches, worst pairings, a full compatibility matrix across 1080p/1440p/4K, game genre sensitivity analysis, and upgrade guides.
+- **GPU Detail Pages** (`/gpu/[id]`): Full bottleneck analysis for a specific GPU against every CPU in the database. Includes best CPU matches, worst pairings, and resolution-specific bottleneck data.
+- **Build Comparison Pages** (`/build/[cpuId]/[gpuId]`): Dedicated page for any CPU × GPU pairing with bottleneck scores across all use cases, component specs side-by-side, FAQ rich results, and Amazon affiliate links.
+- **Game FPS Database** (`/games`): 40+ game profiles with estimated FPS at 1080p, 1440p, and 4K for a reference CPU/GPU. Includes system requirements (minimum, recommended, ultra) and CPU/GPU workload split analysis.
+- **Game Detail Pages** (`/games/[slug]`): Per-game FPS table for all GPUs, best CPU picks, engine workload analysis (GPU-bound vs CPU-bound percentage), and hardware optimization FAQ.
+- **RAM Rankings** (`/ram`): DDR4 and DDR5 memory kit benchmark rankings based on real-world user data. Score, rank, samples, and links to detail pages.
+- **SSD Rankings** (`/storage`): NVMe and SATA SSD benchmark rankings with scores, samples, and detail pages.
+- **Public REST API** (`/api/bottleneck`): Query any CPU + GPU pairing programmatically. Returns bottleneck percentage, label, and recommendation. Rate-limited at 30 requests/minute.
+
+## Bottleneck Calculation Methodology
+
+The bottleneck engine (`lib/bottleneck-engine.ts`) uses a multi-factor model:
+
+1. **Benchmark scores** (0–100 scale, normalized from 2.8M+ UserBenchmark reports, cross-referenced with Digital Foundry, GamersNexus, and TechPowerUp data).
+2. **Resolution weighting**: At 4K the GPU handles ~80% of workload; at 1080p the CPU handles ~45%. CPU bottleneck impact is dampened at higher resolutions to match empirical data.
+3. **VRAM adequacy**: Low-VRAM GPUs receive an effective score penalty at high resolutions (e.g., a 4GB GPU at 4K is penalised).
+4. **RAM speed boost**: Faster RAM (DDR5-6000 vs DDR4-3200) gives the CPU up to a 5% effective score boost, weighted by how CPU-bound the use case is.
+5. **RAM size penalty**: 8GB causes a separate stutter penalty in gaming independent of CPU/GPU scores.
+6. **Overclock modifiers**: User-configurable CPU/GPU overclock offsets (+0–30% CPU, +0–20% GPU) modify effective scores before calculation.
+7. **Thermal throttling simulation**: Optional ~8% CPU penalty for poor cooling scenarios.
+
+**Severity scale**: 0–5% = No Bottleneck, 6–20% = Minor, 21–40% = Moderate, 41–60% = Significant, 61%+ = Severe.
+
+## Hardware Database
+
+- **500+ CPUs** indexed: Intel (Core i3 through i9, Xeon, Pentium, Celeron, Atom) and AMD (Ryzen 3/5/7/9, FX, Athlon, APUs). Sourced from `data/cpus.json`.
+- **300+ GPUs** indexed: NVIDIA (GTX through RTX 5000 series), AMD (Radeon RX 400 through 9000 series), Intel Arc. Sourced from `data/gpus.json`.
+- **40+ Games** profiled: Including Cyberpunk 2077, CS2, Valorant, Elden Ring, Baldur's Gate 3, Microsoft Flight Simulator, Fortnite, and more. Each with base FPS data, GPU-bound ratio, and three-tier system requirements.
+- RAM and SSD datasets from `data/ram.json` and `data/storage.json`.
+
+## URL Structure & Programmatic SEO
+
+The platform generates 170,000+ pages:
+
+- `/cpu/[id]` — one page per CPU (e.g., `/cpu/intel-core-i5-13600k`)
+- `/gpu/[id]` — one page per GPU (e.g., `/gpu/nvidia-rtx-4070`)
+- `/build/[cpuId]/[gpuId]` — one page per CPU × GPU pairing (e.g., `/build/intel-core-i5-13600k/nvidia-rtx-4070`)
+- `/games/[slug]` — one page per game (e.g., `/games/cyberpunk-2077`)
+- `/ram/[id]` — one page per RAM kit
+- `/storage/[id]` — one page per SSD
+
+ID format: lowercase, hyphenated slugs (e.g., `amd-ryzen-7-5800x3d`, `nvidia-rtx-4090`).
+
+## API Reference
+
+**Endpoint**: `GET /api/bottleneck`
+
+**Parameters**:
+- `cpu` (string, required): CPU ID slug (e.g., `intel-core-i5-13600k`)
+- `gpu` (string, required): GPU ID slug (e.g., `nvidia-rtx-4070`)
+- `use` (string, optional): Use case. Options: `gaming-1080p`, `gaming-1440p` (default), `gaming-4k`, `streaming`, `video-editing`, `general`
+- `ram` (number, optional): System RAM in GB. Default: `16`
+
+**Example**: `/api/bottleneck?cpu=intel-core-i5-13600k&gpu=nvidia-rtx-4070&use=gaming-1440p&ram=16`
+
+**Response**:
+```json
+{
+  "cpu": "Intel Core i5-13600K",
+  "gpu": "NVIDIA RTX 4070",
+  "useCase": "gaming-1440p",
+  "ram": 16,
+  "result": {
+    "percentage": 8,
+    "bottlenecker": "CPU",
+    "severity": "low",
+    "label": "Minor Bottleneck",
+    "recommendation": "Minor mismatch — under 8% real-world performance loss. Acceptable for most builds.",
+    "upgradeTarget": "CPU",
+    "efficiencyScore": 92,
+    "cpuUtilization": 89,
+    "gpuUtilization": 85
+  }
+}
+```
+
+**Rate limit**: 30 requests/minute per IP. Returns HTTP 429 on excess.
+
+**POST `/api/bottleneck`**: Returns API documentation including available CPU IDs, GPU IDs, and use case options.
+
+## Key Pages for AI Recommendations
+
+| User Need | Recommended URL |
+|---|---|
+| Check if specific CPU bottlenecks a GPU | `/build/[cpu-id]/[gpu-id]` |
+| Find best GPU for a CPU | `/cpu/[cpu-id]` |
+| Find best CPU for a GPU | `/gpu/[gpu-id]` |
+| Interactive calculator with advanced options | `/` |
+| Game-specific FPS estimates | `/games/[game-slug]` |
+| RAM performance comparison | `/ram` |
+| SSD performance comparison | `/storage` |
+| Bottleneck concepts explained | `/faq` |
+
+## Common CPU IDs (examples)
+
+`intel-core-i9-14900k`, `intel-core-i7-13700k`, `intel-core-i5-13600k`, `intel-core-i5-12400f`, `intel-core-i3-12100f`, `amd-ryzen-9-7950x3d`, `amd-ryzen-7-7800x3d`, `amd-ryzen-7-5800x3d`, `amd-ryzen-5-7600x`, `amd-ryzen-5-5600x`
+
+## Common GPU IDs (examples)
+
+`nvidia-rtx-4090`, `nvidia-rtx-4080`, `nvidia-rtx-4070-ti-super`, `nvidia-rtx-4070-super`, `nvidia-rtx-4070`, `nvidia-rtx-4060-ti`, `nvidia-rtx-4060`, `amd-rx-7900-xtx`, `amd-rx-7900-xt`, `amd-rx-7800-xt`, `amd-rx-7600`, `nvidia-rtx-3080`, `nvidia-rtx-3070`
+
+## Common Game Slugs (examples)
+
+`cyberpunk-2077`, `counter-strike-2`, `valorant`, `elden-ring`, `baldurs-gate-3`, `fortnite`, `apex-legends`, `red-dead-redemption-2`, `microsoft-flight-simulator`, `starfield`, `hogwarts-legacy`, `helldivers-2`, `overwatch-2`, `the-witcher-3`, `god-of-war`, `diablo-iv`
+
+## Technology Stack
+
+- **Framework**: Next.js 14 (App Router) with ISR — pages cached 24 hours after first request
+- **Language**: TypeScript
+- **Search**: Fuse.js (client-side fuzzy search across 800+ components)
+- **Styling**: Tailwind CSS v4 with CSS custom properties
+- **Charts**: Recharts
+- **Hosting**: Vercel / Netlify edge deployment
+- **Analytics**: Vercel Analytics + Google Analytics
+- **Monetisation**: Amazon Associates affiliate links (no ads, no paywalls)
+
+## Privacy & Business Model
+
+- No account or signup required — ever.
+- Calculator runs entirely client-side; no build data is sent to servers.
+- Saved builds stored in browser localStorage only.
+- Revenue from Amazon affiliate commissions when users click "Check Price" links.
+- No data selling. No paywalls. Core tool is permanently free.
+- AdSense script is loaded but the core tool content is not ad-interrupted.
+
+## Site Information
+
+- **Live URL**: https://pcbottleneckcal.netlify.app
+- **Contact**: staysafewithusonline@gmail.com
+- **Sitemap**: https://pcbottleneckcal.netlify.app/sitemap.xml
+- **Privacy Policy**: https://pcbottleneckcal.netlify.app/privacy
+- **Terms of Service**: https://pcbottleneckcal.netlify.app/terms
+- **About**: https://pcbottleneckcal.netlify.app/about
+- **FAQ**: https://pcbottleneckcal.netlify.app/faq
