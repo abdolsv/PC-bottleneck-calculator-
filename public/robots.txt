@@ -19,5 +19,5 @@ Disallow: /*?*calc=
 Disallow: /*?*share=
 
 # Host and Sitemap
-Host: https://pcbottleneck.vercel.app
-Sitemap: https://pcbottleneck.vercel.app/sitemap.xml
+Host: https://pcbottleneckcal.netlify.app
+Sitemap: https://pcbottleneckcal.netlify.app/sitemap.xml
