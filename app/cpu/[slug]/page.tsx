@@ -1,4 +1,16 @@
 // app/cpu/[slug]/page.tsx
+//
+// STATIC GENERATION STRATEGY (bandwidth-conscious):
+// ─────────────────────────────────────────────────
+// • Top 75 CPUs by benchmark score are pre-built at deploy time → zero function
+//   invocations for the most-searched pages, edge-CDN serves them instantly.
+// • Remaining ~425 CPUs use ISR: generated on first crawl hit, then edge-cached
+//   for 24 h. Google triggers ISR when it follows sitemap links, so pages get
+//   built lazily on demand without any extra bandwidth cost after that first hit.
+// • revalidate = 86400 (24 h) keeps regeneration rare — Netlify's CDN stale-
+//   while-revalidate header means even during a revalidation window the old page
+//   is served, so no bandwidth gap.
+
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -10,16 +22,21 @@ import Footer from '@/components/layout/Footer'
 import { AmazonButton } from '@/components/ui/AmazonButton'
 import { SITE_URL } from '@/lib/constants'
 
-// SOLUTION FIX 1: Cache the dynamically generated pages on the CDN for 24 hours (86400 seconds)
+// ─── ISR: cache each page for 24 hours after first generation ─────────────────
 export const revalidate = 86400
 
-// SOLUTION FIX 2: Explicitly tell Next.js to dynamically generate unrendered pages on-demand via ISR
+// ─── Allow any CPU slug to be generated on-demand if not pre-built ────────────
 export const dynamicParams = true
 
+// ─── Pre-build top 75 CPUs at deploy time (sorted highest score first) ────────
+// Rationale: these are the pages users and Google search for most. Building them
+// statically means zero cold-start latency and zero function invocations on the
+// first hit. The remaining ~425 CPUs are handled by ISR on first crawl.
 export function generateStaticParams() {
-  // Return an empty array so Next.js doesn't attempt to build thousands of pages during the build phase.
-  // Pages will be safely compiled one-by-one on demand when a user or crawler visits them.
-  return []
+  return [...CPUs]
+    .sort((a, b) => b.benchmarkScore - a.benchmarkScore)
+    .slice(0, 75)
+    .map(cpu => ({ slug: cpu.id }))
 }
 
 export async function generateMetadata({
@@ -611,30 +628,30 @@ export default async function CpuPage({
             <ul className="space-y-3 mb-4">
               {[
                 {
-                  term: 'GPU Tier vs CPU Score Balance',
+                  title: 'GPU Tier vs CPU Score Balance',
                   body: `The ${cpu.name} scores ${cpu.benchmarkScore}/100. Pairing it with a GPU scoring significantly above ${Math.min(100, cpu.benchmarkScore + 20)}/100 risks a CPU bottleneck, especially at 1080p. Use our compatibility table above to find GPUs within the balanced range.`,
                 },
                 {
-                  term: 'VRAM Capacity',
+                  title: 'VRAM Capacity',
                   body: `For 1080p gaming, 8GB VRAM is sufficient with the ${cpu.name}. For 1440p, 10–12GB is recommended for modern AAA titles with high texture packs. At 4K with ray tracing and DLSS Ultra Quality, 16GB+ VRAM ensures you are never GPU-memory limited.`,
                 },
                 {
-                  term: 'Ray Tracing & AI Upscaling Support',
+                  title: 'Ray Tracing & AI Upscaling Support',
                   body: `NVIDIA RTX cards (3000/4000/5000 series) with Tensor Cores support DLSS 3 Frame Generation, effectively multiplying FPS output and reducing the CPU's per-frame workload. AMD RDNA 3/4 cards with FSR 3 offer similar benefits. Both technologies help alleviate CPU bottlenecks by generating synthetic frames.`,
                 },
                 {
-                  term: 'Power Consumption & PSU Requirements',
+                  title: 'Power Consumption & PSU Requirements',
                   body: `The ${cpu.name} draws ${cpu.tdp}W under full load. Add your GPU's TDP to estimate total system draw. A quality 80+ Gold or Platinum PSU with at least 150W headroom above combined TDP ensures stable, long-term operation and protects your investment.`,
                 },
                 {
-                  term: 'PCIe Generation',
+                  title: 'PCIe Generation',
                   body: `The ${cpu.socket} platform supports PCIe Gen 4 or Gen 5, depending on the chipset. High-bandwidth GPUs (RTX 4090, RX 7900 XTX) benefit from PCIe 4.0 x16 or better. On older platforms with PCIe 3.0, bandwidth limitations can add marginal performance overhead on the most powerful cards.`,
                 },
-              ].map(({ term, body }) => (
-                <li key={term} className="flex gap-3">
+              ].map(({ title, body }) => (
+                <li key={title} className="flex gap-3">
                   <span className="text-[--clr-accent] font-bold flex-shrink-0 mt-0.5">→</span>
                   <p className="text-[--clr-text-secondary] leading-relaxed text-sm">
-                    <strong className="text-[--clr-text-primary]">{term}:</strong> {body}
+                    <strong className="text-[--clr-text-primary]">{title}:</strong> {body}
                   </p>
                 </li>
               ))}

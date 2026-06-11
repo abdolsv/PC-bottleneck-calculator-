@@ -1,4 +1,3 @@
-// app/robots.ts
 import type { MetadataRoute } from 'next'
 import { SITE_URL } from '@/lib/constants'
 
@@ -7,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/api/'],  // Don't index API routes
+      disallow: ['/api/'],  
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
   }
