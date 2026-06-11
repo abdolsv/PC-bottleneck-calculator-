@@ -5,10 +5,24 @@ import { SITE_URL } from '@/lib/constants'
 import ramJson from '@/data/ram.json'
 import storageJson from '@/data/storage.json'
 
-// FIX: Cache and revalidate hourly instead of forcing calculation on every single request
-export const revalidate = 3600 
+// Cache and revalidate hourly instead of forcing calculation on every single request
+export const revalidate = 3600
 
 const CHUNK_SIZE = 5000
+
+// Helper function to safely extract a clean URL slug from corrupted scraper text
+function cleanScraperId(rawId: any): string {
+  if (typeof rawId !== 'string') return String(rawId);
+  
+  // 1. Cut off the string the moment an external URL ('https') shows up
+  let clean = rawId.split(/https/i)[0];
+  
+  // 2. Remove anything that isn't an alphanumeric character, hyphen, or space
+  clean = clean.replace(/[^a-zA-Z0-9\s-]/g, '');
+  
+  // 3. Convert spaces to hyphens and lowercase it for SEO friendly URLs
+  return clean.trim().replace(/[\s]+/g, '-').toLowerCase();
+}
 
 export async function GET(
   request: Request,
@@ -62,14 +76,16 @@ export async function GET(
       xml += `\n  <url><loc>${SITE_URL}/cpu/${cpu.id}</loc><lastmod>${now}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>`
     })
 
-    // RAM detail pages
+    // RAM detail pages (With formatting safety cleanup)
     ;(ramJson as any[]).forEach((ram: any) => {
-      xml += `\n  <url><loc>${SITE_URL}/ram/${ram.id}</loc><lastmod>${now}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>`
+      const cleanRamId = cleanScraperId(ram.id || ram.slug || ram.model);
+      xml += `\n  <url><loc>${SITE_URL}/ram/${cleanRamId}</loc><lastmod>${now}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>`
     })
 
-    // Storage detail pages
+    // Storage detail pages (FIXED: Cleans raw text data and prevents XML blowout)
     ;(storageJson as any[]).forEach((storage: any) => {
-      xml += `\n  <url><loc>${SITE_URL}/storage/${storage.id}</loc><lastmod>${now}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>`
+      const cleanStorageId = cleanScraperId(storage.id || storage.slug || storage.model);
+      xml += `\n  <url><loc>${SITE_URL}/storage/${cleanStorageId}</loc><lastmod>${now}</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>`
     })
 
   } else {
